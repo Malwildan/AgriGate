@@ -1,0 +1,13 @@
+/// agri_core — Public API barrel.
+library agri_core;
+
+// Domain
+export 'src/domain/entities/entities.dart';
+export 'src/domain/failures/failures.dart';
+export 'src/domain/repositories/repositories.dart';
+export 'src/domain/usecases/usecases.dart';
+
+// Data
+export 'src/data/models/lahan_model.dart';
+export 'src/data/repositories/hive_lahan_repository.dart';
+export 'src/data/repositories/open_meteo_weather_repository.dart';

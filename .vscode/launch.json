@@ -1,0 +1,185 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "agrigate",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "agrigate (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "agrigate (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "agri_core",
+            "cwd": "packages\\agri_core",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "agri_core (profile mode)",
+            "cwd": "packages\\agri_core",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "agri_core (release mode)",
+            "cwd": "packages\\agri_core",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "agri_design_system",
+            "cwd": "packages\\agri_design_system",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "agri_design_system (profile mode)",
+            "cwd": "packages\\agri_design_system",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "agri_design_system (release mode)",
+            "cwd": "packages\\agri_design_system",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "device_ble",
+            "cwd": "packages\\device_ble",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "device_ble (profile mode)",
+            "cwd": "packages\\device_ble",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "device_ble (release mode)",
+            "cwd": "packages\\device_ble",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "device_location",
+            "cwd": "packages\\device_location",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "device_location (profile mode)",
+            "cwd": "packages\\device_location",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "device_location (release mode)",
+            "cwd": "packages\\device_location",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "feature_lahan_detail",
+            "cwd": "packages\\feature_lahan_detail",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "feature_lahan_detail (profile mode)",
+            "cwd": "packages\\feature_lahan_detail",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "feature_lahan_detail (release mode)",
+            "cwd": "packages\\feature_lahan_detail",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "feature_lahan_list",
+            "cwd": "packages\\feature_lahan_list",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "feature_lahan_list (profile mode)",
+            "cwd": "packages\\feature_lahan_list",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "feature_lahan_list (release mode)",
+            "cwd": "packages\\feature_lahan_list",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "feature_result",
+            "cwd": "packages\\feature_result",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "feature_result (profile mode)",
+            "cwd": "packages\\feature_result",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "feature_result (release mode)",
+            "cwd": "packages\\feature_result",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "feature_scan",
+            "cwd": "packages\\feature_scan",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "feature_scan (profile mode)",
+            "cwd": "packages\\feature_scan",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "feature_scan (release mode)",
+            "cwd": "packages\\feature_scan",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}

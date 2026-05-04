@@ -1,0 +1,78 @@
+name: agri_gate_app
+description: "AgriGate – Android-first smart soil analysis app."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State management
+  flutter_bloc: ^8.1.6
+  bloc: ^8.1.4
+  equatable: ^2.0.5
+
+  # Dependency injection
+  get_it: ^8.0.2
+  injectable: ^2.4.2
+
+  # Navigation
+  go_router: ^14.6.1
+
+  # Networking (seam for future API)
+  dio: ^5.7.0
+
+  # Local storage
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  shared_preferences: ^2.3.3
+
+  # BLE
+  flutter_blue_plus: ^1.33.3
+
+  # Location
+  geolocator: ^13.0.2
+  permission_handler: ^11.3.1
+
+  # UI utilities
+  flutter_screenutil: ^5.9.3
+  google_fonts: ^6.2.1
+  skeletonizer: ^2.1.3
+  cached_network_image: ^3.4.1
+
+  # Local packages
+  agri_core:
+    path: packages/agri_core
+  agri_design_system:
+    path: packages/agri_design_system
+  device_ble:
+    path: packages/device_ble
+  device_location:
+    path: packages/device_location
+  feature_lahan_list:
+    path: packages/feature_lahan_list
+  feature_scan:
+    path: packages/feature_scan
+  feature_result:
+    path: packages/feature_result
+  feature_lahan_detail:
+    path: packages/feature_lahan_detail
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  injectable_generator: ^2.6.1
+  build_runner: ^2.4.13
+  hive_generator: ^2.0.1
+  bloc_test: ^9.1.7
+  mocktail: ^1.0.4
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/

@@ -1,0 +1,22 @@
+name: agrigate_workspace
+
+packages:
+  - packages/**
+  - .
+
+scripts:
+  analyze:
+    run: melos exec -- dart analyze
+    description: Run dart analyze in all packages
+
+  test:
+    run: melos exec -- flutter test
+    description: Run tests in all packages
+
+  build_runner:
+    run: melos exec --depends-on="build_runner" -- dart run build_runner build --delete-conflicting-outputs
+    description: Run build_runner in all packages that use it
+
+  format:
+    run: melos exec -- dart format lib test
+    description: Format all Dart files
