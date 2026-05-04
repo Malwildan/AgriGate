@@ -184,6 +184,11 @@ class BleDevice extends Equatable {
   final String name;
   final int rssi;
 
+  String get displayName {
+    final trimmedName = name.trim();
+    return trimmedName.isNotEmpty ? trimmedName : id;
+  }
+
   @override
   List<Object?> get props => [id, name, rssi];
 }

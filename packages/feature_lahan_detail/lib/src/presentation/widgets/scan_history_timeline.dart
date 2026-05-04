@@ -74,7 +74,7 @@ class _TimelineItem extends StatelessWidget {
                   height: 10,
                   margin: const EdgeInsets.only(top: 5),
                   decoration: const BoxDecoration(
-                    color: AgriColors.lime,
+                    color: AgriColors.limeDark,
                     shape: BoxShape.circle,
                   ),
                 ),

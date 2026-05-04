@@ -25,34 +25,37 @@ class SoilMetricsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: MetricCard(
-            label: 'pH',
-            value: ph.toStringAsFixed(1),
-            suffix: '',
-            badge: phLabel,
-            badgeBg: phCfg.bg,
-            badgeText: phCfg.text,
-            description: phCfg.desc,
-            icon: Icons.science_rounded,
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: MetricCard(
+              label: 'pH',
+              value: ph.toStringAsFixed(1),
+              suffix: '',
+              badge: phLabel,
+              badgeBg: phCfg.bg,
+              badgeText: phCfg.text,
+              description: phCfg.desc,
+              icon: Icons.science_rounded,
+            ),
           ),
-        ),
-        SizedBox(width: 12.w),
-        Expanded(
-          child: MetricCard(
-            label: 'Kelembapan',
-            value: '$moisture',
-            suffix: '%',
-            badge: moistureLabel,
-            badgeBg: mCfg.bg,
-            badgeText: mCfg.text,
-            description: mCfg.desc,
-            icon: Icons.water_drop_rounded,
+          SizedBox(width: 12.w),
+          Expanded(
+            child: MetricCard(
+              label: 'Kelembapan',
+              value: '$moisture',
+              suffix: '%',
+              badge: moistureLabel,
+              badgeBg: mCfg.bg,
+              badgeText: mCfg.text,
+              description: mCfg.desc,
+              icon: Icons.water_drop_rounded,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

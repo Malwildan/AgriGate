@@ -24,15 +24,13 @@ class DetailHeroCard extends StatelessWidget {
     required this.lahan,
     required this.latest,
     required this.rec,
-    required this.isPickerOpen,
-    required this.onTogglePicker,
+    required this.onStatusSelected,
   });
 
   final Lahan lahan;
   final ScanRecord latest;
   final CropRecommendation rec;
-  final bool isPickerOpen;
-  final VoidCallback onTogglePicker;
+  final ValueChanged<LahanStatus> onStatusSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -120,8 +118,7 @@ class DetailHeroCard extends StatelessWidget {
                     SizedBox(width: 8.w),
                     _StatusButton(
                       status: lahan.status,
-                      isPickerOpen: isPickerOpen,
-                      onTap: onTogglePicker,
+                      onStatusSelected: onStatusSelected,
                     ),
                   ],
                 ),
@@ -186,19 +183,69 @@ class DetailHeroCard extends StatelessWidget {
 class _StatusButton extends StatelessWidget {
   const _StatusButton({
     required this.status,
-    required this.isPickerOpen,
-    required this.onTap,
+    required this.onStatusSelected,
   });
 
   final LahanStatus status;
-  final bool isPickerOpen;
-  final VoidCallback onTap;
+  final ValueChanged<LahanStatus> onStatusSelected;
+
+  static const _items = [
+    (LahanStatus.aktif, Icons.check_circle_outline_rounded),
+    (LahanStatus.perencanaan, Icons.schedule_rounded),
+    (LahanStatus.tidakAktif, Icons.do_not_disturb_on_outlined),
+  ];
 
   @override
   Widget build(BuildContext context) {
     final cfg = _cfg(status);
-    return GestureDetector(
-      onTap: onTap,
+    return PopupMenuButton<LahanStatus>(
+      onSelected: onStatusSelected,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: AgriColors.card,
+      elevation: 4,
+      itemBuilder: (_) => _items
+          .map(
+            (item) => PopupMenuItem<LahanStatus>(
+              value: item.$1,
+              child: Row(
+                children: [
+                  Icon(
+                    item.$2,
+                    size: 18,
+                    color: item.$1 == status
+                        ? AgriColors.forest
+                        : AgriColors.inkMuted,
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    item.$1.label,
+                    style: AgriTypography.textTheme.bodyMedium!.copyWith(
+                      fontWeight: item.$1 == status
+                          ? FontWeight.w700
+                          : FontWeight.w500,
+                      color: item.$1 == status
+                          ? AgriColors.ink
+                          : AgriColors.inkSoft,
+                    ),
+                  ),
+                  if (item.$1 == status) ...[  
+                    const Spacer(),
+                    Container(
+                      width: 18,
+                      height: 18,
+                      decoration: const BoxDecoration(
+                        color: AgriColors.lime,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.check_rounded,
+                          size: 11, color: AgriColors.forest),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          )
+          .toList(),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
@@ -223,9 +270,7 @@ class _StatusButton extends StatelessWidget {
             ),
             SizedBox(width: 4.w),
             Icon(
-              isPickerOpen
-                  ? Icons.keyboard_arrow_up_rounded
-                  : Icons.keyboard_arrow_down_rounded,
+              Icons.keyboard_arrow_down_rounded,
               size: 14,
               color: cfg.text,
             ),

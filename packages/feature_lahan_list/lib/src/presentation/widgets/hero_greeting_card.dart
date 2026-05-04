@@ -58,14 +58,17 @@ class HeroGreetingCard extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 20.h),
-                Row(
-                  children: [
-                    _StatChip(label: 'Lahan', value: lahanCount),
-                    SizedBox(width: 12.w),
-                    _StatChip(label: 'Total Scan', value: totalScans),
-                    SizedBox(width: 12.w),
-                    _StatChip(label: 'Aktif', value: activeCount),
-                  ],
+                IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _StatChip(label: 'Lahan', value: lahanCount),
+                      SizedBox(width: 12.w),
+                      _StatChip(label: 'Total Scan', value: totalScans),
+                      SizedBox(width: 12.w),
+                      _StatChip(label: 'Aktif', value: activeCount),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -98,7 +101,7 @@ class _StatChip extends StatelessWidget {
             Text(
               '$value',
               style: AgriTypography.textTheme.headlineMedium!.copyWith(
-                fontSize: 26,
+                fontSize: 30,
                 color: const Color(0xFFF5F3E9),
                 letterSpacing: -0.6,
               ),
@@ -111,6 +114,8 @@ class _StatChip extends StatelessWidget {
                 fontSize: 11,
                 letterSpacing: 0.6,
               ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

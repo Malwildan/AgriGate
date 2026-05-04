@@ -1,5 +1,7 @@
 // Dependency injection — wires all repositories, use cases, services, and BLoCs.
 
+import 'dart:async';
+
 import 'package:get_it/get_it.dart';
 import '../../core/core.dart';
 import '../../services/ble/ble_service_impl.dart';
@@ -11,6 +13,7 @@ Future<void> configureDependencies() async {
   // ── Repositories (singletons, opened asynchronously) ──────────────────────
   final lahanRepo = await HiveLahanRepository.open();
   final scanRepo = HiveScanRepository(lahanRepo);
+  final bleService = BleServiceImpl();
 
   getIt
     ..registerSingleton<LahanRepository>(lahanRepo)
@@ -18,15 +21,16 @@ Future<void> configureDependencies() async {
     ..registerSingleton<WeatherRepository>(OpenMeteoWeatherRepository())
 
     // ── Services ──────────────────────────────────────────────────────────────
-    ..registerSingleton<BleService>(BleServiceImpl())
+    ..registerSingleton<BleService>(bleService)
     ..registerSingleton<LocationService>(LocationServiceImpl())
 
     // ── Use cases ─────────────────────────────────────────────────────────────
     ..registerFactory(() => GetAllLahanUseCase(getIt<LahanRepository>()))
     ..registerFactory(() => GetLahanByIdUseCase(getIt<LahanRepository>()))
     ..registerFactory(() => AddLahanUseCase(getIt<LahanRepository>()))
-    ..registerFactory(() =>
-        UpdateLahanStatusUseCase(getIt<LahanRepository>()))
+    ..registerFactory(() => UpdateLahanStatusUseCase(getIt<LahanRepository>()))
     ..registerFactory(() => SaveScanResultUseCase(getIt<ScanRepository>()))
     ..registerFactory(() => GetWeatherUseCase(getIt<WeatherRepository>()));
+
+  unawaited(bleService.initialize());
 }

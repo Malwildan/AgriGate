@@ -57,10 +57,6 @@ class ScanGpsRequested extends ScanEvent {
   const ScanGpsRequested();
 }
 
-class ScanGpsReset extends ScanEvent {
-  const ScanGpsReset();
-}
-
 class ScanBleStartScanRequested extends ScanEvent {
   const ScanBleStartScanRequested();
 }
@@ -87,6 +83,16 @@ class ScanTakeDataRequested extends ScanEvent {
 // ─── States ───────────────────────────────────────────────────────────────────
 
 enum ScanBleStatus { disconnected, scanning, connecting, connected, error }
+
+ScanBleStatus _mapBleConnectionState(BleConnectionState connectionState) {
+  return switch (connectionState) {
+    BleConnectionState.connected => ScanBleStatus.connected,
+    BleConnectionState.connecting => ScanBleStatus.connecting,
+    BleConnectionState.disconnecting ||
+    BleConnectionState.disconnected =>
+      ScanBleStatus.disconnected,
+  };
+}
 
 class ScanState extends Equatable {
   const ScanState({
@@ -169,10 +175,20 @@ class ScanState extends Equatable {
 
   @override
   List<Object?> get props => [
-        lahanId, owner, area, location, bleStatus, bleError,
-        isRescan, isCapturingGps, gpsError,
-        isTakingData, capturedData, scanError,
-        discoveredDevices, connectedDevice,
+        lahanId,
+        owner,
+        area,
+        location,
+        bleStatus,
+        bleError,
+        isRescan,
+        isCapturingGps,
+        gpsError,
+        isTakingData,
+        capturedData,
+        scanError,
+        discoveredDevices,
+        connectedDevice,
       ];
 }
 
@@ -190,7 +206,6 @@ class ScanBloc extends Bloc<ScanEvent, ScanState> {
     on<ScanAreaChanged>(_onAreaChanged);
     on<ScanLocationChanged>(_onLocationChanged);
     on<ScanGpsRequested>(_onGpsRequested);
-    on<ScanGpsReset>(_onGpsReset);
     on<ScanBleStartScanRequested>(_onStartScanRequested);
     on<ScanBleStopScanRequested>(_onStopScanRequested);
     on<ScanBleDeviceSelected>(_onDeviceSelected);
@@ -200,17 +215,11 @@ class ScanBloc extends Bloc<ScanEvent, ScanState> {
     on<_ScanResultsUpdated>(_onScanResultsUpdated);
 
     _bleSubscription = _bleService.connectionState.listen((connectionState) {
-      final bleStatus = switch (connectionState) {
-        BleConnectionState.connected => ScanBleStatus.connected,
-        BleConnectionState.connecting => ScanBleStatus.connecting,
-        BleConnectionState.disconnecting ||
-        BleConnectionState.disconnected => ScanBleStatus.disconnected,
-      };
+      final bleStatus = _mapBleConnectionState(connectionState);
       if (!isClosed) add(_BleStateChanged(bleStatus));
     });
 
-    _scanResultsSubscription =
-        _bleService.scanResults.listen((devices) {
+    _scanResultsSubscription = _bleService.scanResults.listen((devices) {
       if (!isClosed) add(_ScanResultsUpdated(devices));
     });
   }
@@ -220,6 +229,20 @@ class ScanBloc extends Bloc<ScanEvent, ScanState> {
   StreamSubscription<BleConnectionState>? _bleSubscription;
   StreamSubscription<List<BleDevice>>? _scanResultsSubscription;
 
+  BleDevice? _visibleConnectedDevice([BleConnectionState? connectionState]) {
+    final currentState = connectionState ?? _bleService.currentConnectionState;
+    if (currentState == BleConnectionState.disconnected ||
+        currentState == BleConnectionState.disconnecting) {
+      return null;
+    }
+
+    return _bleService.currentConnectedDevice ??
+        _bleService.lastKnownConnectedDevice;
+  }
+
+  BleDevice? get currentBleConnectedDevice =>
+      _visibleConnectedDevice();
+
   @override
   Future<void> close() {
     _bleSubscription?.cancel();
@@ -228,17 +251,19 @@ class ScanBloc extends Bloc<ScanEvent, ScanState> {
   }
 
   void _onInitialized(ScanInitialized event, Emitter<ScanState> emit) {
-    emit(state.copyWith(
+    final connectionState = _bleService.currentConnectionState;
+    final bleStatus = _mapBleConnectionState(connectionState);
+    final connectedDevice = _visibleConnectedDevice(connectionState);
+
+    emit(ScanState(
       lahanId: event.prefilledLahanId,
       owner: event.prefilledOwner,
       area: event.prefilledArea,
       location: event.prefilledLocation,
       isRescan: event.prefilledLahanId != null,
-      bleStatus: ScanBleStatus.disconnected,
-      discoveredDevices: [],
-      clearBleError: true,
-      clearCapturedData: true,
-      clearConnectedDevice: true,
+      bleStatus: bleStatus,
+      discoveredDevices: const [],
+      connectedDevice: connectedDevice,
     ));
   }
 
@@ -278,18 +303,16 @@ class ScanBloc extends Bloc<ScanEvent, ScanState> {
     );
   }
 
-  void _onGpsReset(ScanGpsReset event, Emitter<ScanState> emit) =>
-      emit(state.copyWith(location: '', clearGpsError: true));
-
   Future<void> _onStartScanRequested(
     ScanBleStartScanRequested event,
     Emitter<ScanState> emit,
   ) async {
+    final connectedDevice = _visibleConnectedDevice();
     emit(state.copyWith(
       bleStatus: ScanBleStatus.scanning,
       discoveredDevices: [],
       clearBleError: true,
-      clearConnectedDevice: true,
+      connectedDevice: connectedDevice,
     ));
     await _bleService.startScan();
   }
@@ -299,14 +322,22 @@ class ScanBloc extends Bloc<ScanEvent, ScanState> {
     Emitter<ScanState> emit,
   ) async {
     await _bleService.stopScan();
-    emit(state.copyWith(bleStatus: ScanBleStatus.disconnected));
+    final connectionState = _bleService.currentConnectionState;
+    final bleStatus = _mapBleConnectionState(connectionState);
+    emit(state.copyWith(
+      bleStatus: bleStatus,
+      discoveredDevices: const [],
+      connectedDevice: _visibleConnectedDevice(connectionState),
+      clearConnectedDevice: bleStatus == ScanBleStatus.disconnected,
+    ));
   }
 
   Future<void> _onDeviceSelected(
     ScanBleDeviceSelected event,
     Emitter<ScanState> emit,
   ) async {
-    emit(state.copyWith(bleStatus: ScanBleStatus.connecting, clearBleError: true));
+    emit(state.copyWith(
+        bleStatus: ScanBleStatus.connecting, clearBleError: true));
     final result = await _bleService.connectToDevice(event.device.id);
     result.fold(
       (failure) => emit(state.copyWith(
@@ -354,8 +385,25 @@ class ScanBloc extends Bloc<ScanEvent, ScanState> {
   void _onBleStateChanged(_BleStateChanged event, Emitter<ScanState> emit) {
     // Only process hardware-driven state changes when not already in scanning mode
     if (state.bleStatus == ScanBleStatus.scanning &&
-        event.status == ScanBleStatus.disconnected) return;
-    emit(state.copyWith(bleStatus: event.status));
+        event.status == ScanBleStatus.disconnected &&
+        state.connectedDevice == null) {
+      return;
+    }
+
+    if (event.status == ScanBleStatus.disconnected) {
+      emit(state.copyWith(
+        bleStatus: event.status,
+        discoveredDevices: const [],
+        clearConnectedDevice: true,
+      ));
+      return;
+    }
+
+    emit(state.copyWith(
+      bleStatus: event.status,
+      connectedDevice:
+          _bleService.currentConnectedDevice ?? _bleService.lastKnownConnectedDevice,
+    ));
   }
 
   void _onScanResultsUpdated(

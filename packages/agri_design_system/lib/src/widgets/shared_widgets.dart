@@ -13,12 +13,14 @@ class AgriAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.backLabel,
     this.onBack,
     this.dark = false,
+    this.statusBadge,
     this.actions,
   });
 
   final String? backLabel;
   final VoidCallback? onBack;
   final bool dark;
+  final Widget? statusBadge;
   final List<Widget>? actions;
 
   @override
@@ -40,12 +42,12 @@ class AgriAppBar extends StatelessWidget implements PreferredSizeWidget {
             child: Row(
               children: [
                 if (onBack != null)
-                  _BackButton(label: backLabel, onBack: onBack!, dark: dark, tone: tone)
+                  _BackButton(
+                      label: backLabel, onBack: onBack!, dark: dark, tone: tone)
                 else
                   _AgriLogo(tone: tone, dark: dark),
                 const Spacer(),
-                if (onBack == null)
-                  _LiveBadge(dark: dark),
+                if (onBack == null) statusBadge ?? _LiveBadge(dark: dark),
                 if (actions != null) ...actions!,
               ],
             ),
@@ -77,14 +79,10 @@ class _BackButton extends StatelessWidget {
         height: 48,
         padding: const EdgeInsets.only(left: 14, right: 18),
         decoration: BoxDecoration(
-          color: dark
-              ? const Color(0x14F0EDE1)
-              : AgriColors.card,
+          color: dark ? const Color(0x14F0EDE1) : AgriColors.card,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(
-            color: dark
-                ? const Color(0x24F0EDE1)
-                : AgriColors.border,
+            color: dark ? const Color(0x24F0EDE1) : AgriColors.border,
           ),
         ),
         child: Row(
@@ -94,7 +92,8 @@ class _BackButton extends StatelessWidget {
             SizedBox(width: 4.w),
             Text(
               label ?? 'Kembali',
-              style: AgriTypography.textTheme.titleMedium!.copyWith(color: tone),
+              style:
+                  AgriTypography.textTheme.titleMedium!.copyWith(color: tone),
             ),
           ],
         ),
@@ -121,7 +120,8 @@ class _AgriLogo extends StatelessWidget {
             color: AgriColors.lime,
             shape: BoxShape.circle,
           ),
-          child: const Icon(Icons.eco_rounded, size: 18, color: AgriColors.forest),
+          child:
+              const Icon(Icons.eco_rounded, size: 18, color: AgriColors.forest),
         ),
         SizedBox(width: 10.w),
         Text(
@@ -143,13 +143,9 @@ class _LiveBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: dark
-            ? const Color(0x2EC8F04D)
-            : AgriColors.card,
+        color: dark ? const Color(0x2EC8F04D) : AgriColors.card,
         borderRadius: BorderRadius.circular(20),
-        border: dark
-            ? null
-            : Border.all(color: AgriColors.border),
+        border: dark ? null : Border.all(color: AgriColors.border),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -281,9 +277,7 @@ class AgriCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(borderRadius),
-        border: border
-            ? Border.all(color: AgriColors.border)
-            : null,
+        border: border ? Border.all(color: AgriColors.border) : null,
       ),
       padding: padding ?? EdgeInsets.all(16.w),
       child: child,
@@ -331,13 +325,13 @@ class AgriPrimaryButton extends StatelessWidget {
                 height: 22,
                 child: CircularProgressIndicator.adaptive(
                   strokeWidth: 2.5,
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(AgriColors.forest),
+                  valueColor: AlwaysStoppedAnimation<Color>(AgriColors.forest),
                 ),
               )
             else if (icon != null) ...[
-              Icon(icon, size: 22,
-                color: isActive ? AgriColors.forest : AgriColors.inkMuted),
+              Icon(icon,
+                  size: 22,
+                  color: isActive ? AgriColors.forest : AgriColors.inkMuted),
               SizedBox(width: 10.w),
             ],
             if (!loading)
@@ -372,7 +366,8 @@ class StickyBottomBar extends StatelessWidget {
           colors: [AgriColors.background, Color(0x00EBE9E0)],
         ),
       ),
-      padding: EdgeInsets.fromLTRB(20.w, 16, 20.w, 20 + MediaQuery.viewPaddingOf(context).bottom),
+      padding: EdgeInsets.fromLTRB(
+          20.w, 16, 20.w, 20 + MediaQuery.viewPaddingOf(context).bottom),
       child: child,
     );
   }
@@ -426,17 +421,45 @@ class _TopoPainter extends CustomPainter {
           (pts[i].dy + pts[i + 1].dy) / 2 * sy,
         );
         path.quadraticBezierTo(
-          pts[i].dx * sx, pts[i].dy * sy, mid.dx, mid.dy,
+          pts[i].dx * sx,
+          pts[i].dy * sy,
+          mid.dx,
+          mid.dy,
         );
       }
       canvas.drawPath(path, paint);
     }
 
-    drawCurve([const Offset(-20, 80), const Offset(80, 40), const Offset(180, 90), const Offset(420, 110)]);
-    drawCurve([const Offset(-20, 130), const Offset(90, 100), const Offset(200, 140), const Offset(420, 160)]);
-    drawCurve([const Offset(-20, 200), const Offset(100, 160), const Offset(220, 210), const Offset(420, 220)]);
-    drawCurve([const Offset(-20, 260), const Offset(110, 230), const Offset(240, 270), const Offset(420, 280)]);
-    drawCurve([const Offset(-20, 320), const Offset(100, 290), const Offset(230, 330), const Offset(420, 340)]);
+    drawCurve([
+      const Offset(-20, 80),
+      const Offset(80, 40),
+      const Offset(180, 90),
+      const Offset(420, 110)
+    ]);
+    drawCurve([
+      const Offset(-20, 130),
+      const Offset(90, 100),
+      const Offset(200, 140),
+      const Offset(420, 160)
+    ]);
+    drawCurve([
+      const Offset(-20, 200),
+      const Offset(100, 160),
+      const Offset(220, 210),
+      const Offset(420, 220)
+    ]);
+    drawCurve([
+      const Offset(-20, 260),
+      const Offset(110, 230),
+      const Offset(240, 270),
+      const Offset(420, 280)
+    ]);
+    drawCurve([
+      const Offset(-20, 320),
+      const Offset(100, 290),
+      const Offset(230, 330),
+      const Offset(420, 340)
+    ]);
 
     void drawEllipse(double cx, double cy, double rx, double ry) {
       canvas.drawOval(

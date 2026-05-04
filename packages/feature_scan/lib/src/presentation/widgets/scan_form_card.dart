@@ -15,7 +15,6 @@ class ScanFormCard extends StatelessWidget {
     required this.onAreaChanged,
     required this.onLocationChanged,
     required this.onGpsRequested,
-    required this.onGpsReset,
     this.gpsError,
   });
 
@@ -28,7 +27,6 @@ class ScanFormCard extends StatelessWidget {
   final ValueChanged<String> onAreaChanged;
   final ValueChanged<String> onLocationChanged;
   final VoidCallback onGpsRequested;
-  final VoidCallback onGpsReset;
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +62,6 @@ class ScanFormCard extends StatelessWidget {
                 error: gpsError,
                 onChanged: onLocationChanged,
                 onGpsRequested: onGpsRequested,
-                onGpsReset: onGpsReset,
               ),
             ],
           ),
@@ -153,7 +150,6 @@ class _GpsField extends StatefulWidget {
     required this.isCapturing,
     required this.onChanged,
     required this.onGpsRequested,
-    required this.onGpsReset,
     this.error,
   });
 
@@ -162,7 +158,6 @@ class _GpsField extends StatefulWidget {
   final String? error;
   final ValueChanged<String> onChanged;
   final VoidCallback onGpsRequested;
-  final VoidCallback onGpsReset;
 
   @override
   State<_GpsField> createState() => _GpsFieldState();
@@ -236,16 +231,7 @@ class _GpsFieldState extends State<_GpsField> {
                       size: 20, color: AgriColors.forest),
               bgColor: AgriColors.lime,
             ),
-            if (widget.location.isNotEmpty) ...[
-              SizedBox(width: 8.w),
-              _GpsIconButton(
-                onTap: widget.onGpsReset,
-                child: const Icon(Icons.refresh_rounded,
-                    size: 18, color: Color(0xFFDC2626)),
-                bgColor: const Color(0xFFFFF2F2),
-                borderColor: const Color(0x4CDC2626),
-              ),
-            ],
+
           ],
         ),
         if (widget.error != null) ...[

@@ -16,6 +16,7 @@ dependencies:
     path: ../agri_core
   agri_design_system:
     path: ../agri_design_system
+  auto_size_text: ^3.0.0
 
 dev_dependencies:
   flutter_test:

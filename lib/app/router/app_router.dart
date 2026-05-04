@@ -8,6 +8,7 @@ import 'package:feature_scan/feature_scan.dart';
 import 'package:feature_result/feature_result.dart';
 import 'package:feature_lahan_detail/feature_lahan_detail.dart';
 import '../di/injection.dart';
+import '../widgets/bluetooth_connection_badge.dart';
 
 /// Extra payload passed on /result route.
 class ResultRouteExtra {
@@ -50,6 +51,7 @@ final appRouter = GoRouter(
         child: LahanListPage(
           onSelectLahan: (id) => context.push('/detail/$id'),
           onAddLahan: () => context.push('/scan'),
+          appBarStatusIndicator: const BluetoothConnectionBadge(),
         ),
       ),
     ),

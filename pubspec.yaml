@@ -60,6 +60,7 @@ dependencies:
     path: packages/feature_result
   feature_lahan_detail:
     path: packages/feature_lahan_detail
+  auto_size_text: ^3.0.0
 
 dev_dependencies:
   flutter_test:

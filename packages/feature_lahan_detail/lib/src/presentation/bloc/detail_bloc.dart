@@ -31,10 +31,6 @@ class DetailStatusChanged extends DetailEvent {
   List<Object?> get props => [lahanId, status];
 }
 
-class DetailStatusPickerToggled extends DetailEvent {
-  const DetailStatusPickerToggled();
-}
-
 // ─── States ───────────────────────────────────────────────────────────────────
 
 sealed class DetailState extends Equatable {
@@ -52,23 +48,16 @@ class DetailLoading extends DetailState {
 }
 
 class DetailLoaded extends DetailState {
-  const DetailLoaded({
-    required this.lahan,
-    this.isPickerOpen = false,
-  });
+  const DetailLoaded({required this.lahan});
 
   final Lahan lahan;
-  final bool isPickerOpen;
 
-  DetailLoaded copyWith({Lahan? lahan, bool? isPickerOpen}) {
-    return DetailLoaded(
-      lahan: lahan ?? this.lahan,
-      isPickerOpen: isPickerOpen ?? this.isPickerOpen,
-    );
+  DetailLoaded copyWith({Lahan? lahan}) {
+    return DetailLoaded(lahan: lahan ?? this.lahan);
   }
 
   @override
-  List<Object?> get props => [lahan, isPickerOpen];
+  List<Object?> get props => [lahan];
 }
 
 class DetailError extends DetailState {
@@ -91,7 +80,6 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
         super(const DetailInitial()) {
     on<DetailLoadRequested>(_onLoad);
     on<DetailStatusChanged>(_onStatusChanged);
-    on<DetailStatusPickerToggled>(_onPickerToggled);
   }
 
   final GetLahanByIdUseCase _getLahanById;
@@ -125,17 +113,7 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
 
     result.fold(
       (failure) => emit(DetailError(failure.message)),
-      (lahan) => emit(current.copyWith(lahan: lahan, isPickerOpen: false)),
+      (lahan) => emit(current.copyWith(lahan: lahan)),
     );
-  }
-
-  void _onPickerToggled(
-    DetailStatusPickerToggled event,
-    Emitter<DetailState> emit,
-  ) {
-    final current = state;
-    if (current is DetailLoaded) {
-      emit(current.copyWith(isPickerOpen: !current.isPickerOpen));
-    }
   }
 }

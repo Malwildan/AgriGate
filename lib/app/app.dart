@@ -1,12 +1,45 @@
 // App widget — MaterialApp.router with AgriTheme and ScreenUtilInit.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../design_system/design_system.dart';
 import 'router/app_router.dart';
 
-class AgriGateApp extends StatelessWidget {
+class AgriGateApp extends StatefulWidget {
   const AgriGateApp({super.key});
+
+  @override
+  State<AgriGateApp> createState() => _AgriGateAppState();
+}
+
+class _AgriGateAppState extends State<AgriGateApp>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _applyFullscreenMode();
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _applyFullscreenMode();
+    }
+  }
+
+  Future<void> _applyFullscreenMode() async {
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  }
 
   @override
   Widget build(BuildContext context) {

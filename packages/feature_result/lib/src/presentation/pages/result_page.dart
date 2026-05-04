@@ -84,7 +84,7 @@ class _ResultPageState extends State<ResultPage> {
           body: (ready != null)
               ? _buildContent(context, ready, isSaving: isSaving)
               : isLoadingWeather
-                  ? _buildWeatherLoading()
+                  ? Center(child: _buildWeatherLoading())
                   : const Center(child: CircularProgressIndicator.adaptive()),
           bottomNavigationBar: ready != null
               ? StickyCtaWrapper(
@@ -156,7 +156,7 @@ class _ResultPageState extends State<ResultPage> {
     return Padding(
       padding: EdgeInsets.all(20.w),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           const CircularProgressIndicator.adaptive(),
           SizedBox(height: 16.h),

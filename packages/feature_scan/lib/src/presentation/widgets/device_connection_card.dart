@@ -14,21 +14,13 @@ class DeviceConnectionCard extends StatelessWidget {
   const DeviceConnectionCard({
     super.key,
     required this.bleStatus,
-    required this.discoveredDevices,
     required this.connectedDevice,
-    required this.onStartScan,
-    required this.onStopScan,
-    required this.onDeviceSelected,
     required this.onDisconnect,
     this.bleError,
   });
 
   final ScanBleStatus bleStatus;
-  final List<BleDevice> discoveredDevices;
   final BleDevice? connectedDevice;
-  final VoidCallback onStartScan;
-  final VoidCallback onStopScan;
-  final ValueChanged<BleDevice> onDeviceSelected;
   final VoidCallback onDisconnect;
   final String? bleError;
 
@@ -52,21 +44,17 @@ class DeviceConnectionCard extends StatelessWidget {
             ScanBleStatus.connecting => _ConnectingCard(
                 key: const ValueKey('connecting'),
                 device: connectedDevice,
+                onCancel: onDisconnect,
               ),
-            // While scanning, still show the idle card (sheet is open on top)
             ScanBleStatus.scanning ||
             ScanBleStatus.error ||
-            ScanBleStatus.disconnected => _IdleCard(
+            ScanBleStatus.disconnected =>
+              _IdleCard(
                 key: const ValueKey('idle'),
+                device: connectedDevice,
                 errorMessage:
                     bleStatus == ScanBleStatus.error ? bleError : null,
-                onOpenPicker: () async {
-                  final device =
-                      await BleDevicePickerSheet.show(context);
-                  if (device != null) {
-                    onDeviceSelected(device);
-                  }
-                },
+                onOpenPicker: () => BleDevicePickerSheet.show(context),
               ),
           },
         ),
@@ -81,16 +69,19 @@ class _IdleCard extends StatelessWidget {
   const _IdleCard({
     super.key,
     required this.onOpenPicker,
+    this.device,
     this.errorMessage,
   });
 
   final VoidCallback onOpenPicker;
+  final BleDevice? device;
   final String? errorMessage;
 
   @override
   Widget build(BuildContext context) {
     return _ForestCard(
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             width: 80,
@@ -108,7 +99,7 @@ class _IdleCard extends StatelessWidget {
           ),
           SizedBox(height: 16.h),
           Text(
-            'Hubungkan ke ESP32',
+            'Hubungkan ke AgriSensor',
             style: AgriTypography.textTheme.headlineSmall!
                 .copyWith(color: const Color(0xFFF0EDE1)),
             textAlign: TextAlign.center,
@@ -123,8 +114,7 @@ class _IdleCard extends StatelessWidget {
           if (errorMessage != null) ...[
             SizedBox(height: 12.h),
             Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: const Color(0x2EF47878),
                 borderRadius: BorderRadius.circular(12),
@@ -161,14 +151,16 @@ class _IdleCard extends StatelessWidget {
 // ─── Connecting card ──────────────────────────────────────────────────────────
 
 class _ConnectingCard extends StatelessWidget {
-  const _ConnectingCard({super.key, this.device});
+  const _ConnectingCard({super.key, this.device, required this.onCancel});
 
   final BleDevice? device;
+  final VoidCallback onCancel;
 
   @override
   Widget build(BuildContext context) {
     return _ForestCard(
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(
             width: 72,
@@ -187,11 +179,18 @@ class _ConnectingCard extends StatelessWidget {
           if (device != null) ...[
             SizedBox(height: 6.h),
             Text(
-              device!.name,
+              device!.displayName,
               style: AgriTypography.textTheme.bodyMedium!
                   .copyWith(color: const Color(0xB3F0EDE1)),
             ),
           ],
+          SizedBox(height: 20.h),
+          _ActionButton(
+            label: 'Batal',
+            icon: Icons.close_rounded,
+            outlined: true,
+            onTap: onCancel,
+          ),
         ],
       ),
     );
@@ -208,9 +207,8 @@ class _ConnectedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rssiPercent = device != null
-        ? ((device!.rssi + 100).clamp(0, 70) / 70.0)
-        : 0.0;
+    final rssiPercent =
+        device != null ? ((device!.rssi + 100).clamp(0, 70) / 70.0) : 0.0;
     final signalIcon = rssiPercent > 0.6
         ? Icons.signal_cellular_alt_rounded
         : rssiPercent > 0.3
@@ -219,6 +217,9 @@ class _ConnectedCard extends StatelessWidget {
 
     return _ForestCard(
       child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
@@ -236,7 +237,7 @@ class _ConnectedCard extends StatelessWidget {
           ),
           SizedBox(height: 14.h),
           Text(
-            device?.name ?? 'AgriSensor',
+            device?.displayName ?? 'AgriSensor',
             style: AgriTypography.textTheme.headlineSmall!
                 .copyWith(color: const Color(0xFFF0EDE1)),
             textAlign: TextAlign.center,
@@ -301,7 +302,10 @@ class _ForestCard extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsets.all(28.w),
-            child: child,
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: 300.h),
+              child: Center(child: child),
+            ),
           ),
         ],
       ),
@@ -331,24 +335,19 @@ class _ActionButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: outlined ? const Color(0x14F0EDE1) : AgriColors.lime,
           borderRadius: BorderRadius.circular(24),
-          border:
-              outlined ? Border.all(color: const Color(0x28F0EDE1)) : null,
+          border: outlined ? Border.all(color: const Color(0x28F0EDE1)) : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon,
                 size: 18,
-                color: outlined
-                    ? const Color(0xFFF0EDE1)
-                    : AgriColors.forest),
+                color: outlined ? const Color(0xFFF0EDE1) : AgriColors.forest),
             const SizedBox(width: 8),
             Text(
               label,
               style: AgriTypography.textTheme.titleMedium!.copyWith(
-                color: outlined
-                    ? const Color(0xFFF0EDE1)
-                    : AgriColors.forest,
+                color: outlined ? const Color(0xFFF0EDE1) : AgriColors.forest,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -384,8 +383,8 @@ class _StatusBadge extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style:
-                AgriTypography.badgeText.copyWith(color: color, letterSpacing: 0.4),
+            style: AgriTypography.badgeText
+                .copyWith(color: color, letterSpacing: 0.4),
           ),
         ],
       ),

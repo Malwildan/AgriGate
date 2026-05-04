@@ -8,7 +8,6 @@ import 'package:agri_core/agri_core.dart';
 import 'package:agri_design_system/agri_design_system.dart';
 import '../bloc/detail_bloc.dart';
 import '../widgets/detail_hero_card.dart';
-import '../widgets/status_picker.dart';
 import '../widgets/scan_history_timeline.dart';
 
 class LahanDetailPage extends StatefulWidget {
@@ -43,8 +42,8 @@ class _LahanDetailPageState extends State<LahanDetailPage> {
           appBar: AgriAppBar(backLabel: 'Lahan', onBack: widget.onBack),
           body: switch (state) {
             DetailLoading() || DetailInitial() => _buildSkeleton(),
-            DetailLoaded(:final lahan, :final isPickerOpen) =>
-              _buildContent(context, lahan, isPickerOpen),
+            DetailLoaded(:final lahan) =>
+              _buildContent(context, lahan),
             DetailError(:final message) => _buildError(context, message),
           },
           bottomNavigationBar: state is DetailLoaded
@@ -64,7 +63,6 @@ class _LahanDetailPageState extends State<LahanDetailPage> {
   Widget _buildContent(
     BuildContext context,
     Lahan lahan,
-    bool isPickerOpen,
   ) {
     final latest = lahan.latestScan;
     final rec = latest != null
@@ -87,22 +85,12 @@ class _LahanDetailPageState extends State<LahanDetailPage> {
                     lahan: lahan,
                     latest: latest,
                     rec: rec,
-                    isPickerOpen: isPickerOpen,
-                    onTogglePicker: () => context
-                        .read<DetailBloc>()
-                        .add(const DetailStatusPickerToggled()),
-                  ),
-                if (isPickerOpen) ...[
-                  SizedBox(height: 12.h),
-                  StatusPicker(
-                    currentStatus: lahan.status,
                     onStatusSelected: (status) =>
                         context.read<DetailBloc>().add(DetailStatusChanged(
                               lahanId: lahan.id,
                               status: status,
                             )),
                   ),
-                ],
                 if (latest != null && rec != null) ...[
                   SizedBox(height: 12.h),
                   _QuickMetrics(latest: latest, rec: rec),

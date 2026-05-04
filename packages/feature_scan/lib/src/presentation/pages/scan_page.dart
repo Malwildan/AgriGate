@@ -117,8 +117,6 @@ class _ScanPageState extends State<ScanPage> {
                         context.read<ScanBloc>().add(ScanLocationChanged(v)),
                     onGpsRequested: () =>
                         context.read<ScanBloc>().add(const ScanGpsRequested()),
-                    onGpsReset: () =>
-                        context.read<ScanBloc>().add(const ScanGpsReset()),
                   ),
                 ),
               ),
@@ -128,15 +126,8 @@ class _ScanPageState extends State<ScanPage> {
                 sliver: SliverToBoxAdapter(
                   child: DeviceConnectionCard(
                     bleStatus: state.bleStatus,
-                    discoveredDevices: state.discoveredDevices,
                     connectedDevice: state.connectedDevice,
                     bleError: state.bleError,
-                    onStartScan: () =>
-                        context.read<ScanBloc>().add(const ScanBleStartScanRequested()),
-                    onStopScan: () =>
-                        context.read<ScanBloc>().add(const ScanBleStopScanRequested()),
-                    onDeviceSelected: (device) =>
-                        context.read<ScanBloc>().add(ScanBleDeviceSelected(device)),
                     onDisconnect: () =>
                         context.read<ScanBloc>().add(const ScanDisconnectRequested()),
                   ),

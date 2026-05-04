@@ -37,19 +37,21 @@ class LahanCard extends StatelessWidget {
         ),
         child: Padding(
           padding: EdgeInsets.all(12.w),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _Thumbnail(imageUrl: cropImg),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: _CardBody(
-                  lahan: lahan,
-                  latest: latest,
-                  rec: rec,
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _Thumbnail(imageUrl: cropImg),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: _CardBody(
+                    lahan: lahan,
+                    latest: latest,
+                    rec: rec,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -66,7 +68,6 @@ class _Thumbnail extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 96,
-      height: 96,
       decoration: BoxDecoration(
         color: AgriColors.forest,
         borderRadius: BorderRadius.circular(16),

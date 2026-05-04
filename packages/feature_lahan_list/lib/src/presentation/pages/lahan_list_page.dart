@@ -15,10 +15,12 @@ class LahanListPage extends StatefulWidget {
     super.key,
     required this.onAddLahan,
     required this.onSelectLahan,
+    this.appBarStatusIndicator,
   });
 
   final VoidCallback onAddLahan;
   final ValueChanged<int> onSelectLahan;
+  final Widget? appBarStatusIndicator;
 
   @override
   State<LahanListPage> createState() => _LahanListPageState();
@@ -35,25 +37,28 @@ class _LahanListPageState extends State<LahanListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AgriColors.background,
-      appBar: const AgriAppBar(),
+      appBar: AgriAppBar(statusBadge: widget.appBarStatusIndicator),
       body: BlocBuilder<LahanListBloc, LahanListState>(
         builder: (context, state) {
           return switch (state) {
             LahanListInitial() || LahanListLoading() => _buildSkeleton(),
-            LahanListLoaded(lahanList: final list,
+            LahanListLoaded(
+              lahanList: final list,
               totalScans: final totalScans,
-              activeCount: final activeCount) =>
+              activeCount: final activeCount
+            ) =>
               _buildContent(list, totalScans, activeCount),
             LahanListError(message: final msg) => _buildError(msg),
           };
         },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: widget.onAddLahan,
         backgroundColor: AgriColors.lime,
         foregroundColor: AgriColors.forest,
         elevation: 0,
-        child: const Icon(Icons.add_rounded, size: 28),
+        icon: const Icon(Icons.add_rounded, size: 24),
+        label: const Text('Tambah Lahan'),
       ),
     );
   }
@@ -65,9 +70,7 @@ class _LahanListPageState extends State<LahanListPage> {
   ) {
     return RefreshIndicator.adaptive(
       onRefresh: () async {
-        context
-            .read<LahanListBloc>()
-            .add(const LahanListRefreshRequested());
+        context.read<LahanListBloc>().add(const LahanListRefreshRequested());
       },
       color: AgriColors.forest,
       child: CustomScrollView(

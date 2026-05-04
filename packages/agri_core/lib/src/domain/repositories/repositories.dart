@@ -59,6 +59,10 @@ abstract interface class ScanRepository {
 abstract interface class BleService {
   Stream<BleConnectionState> get connectionState;
   Stream<List<BleDevice>> get scanResults;
+  BleConnectionState get currentConnectionState;
+  BleDevice? get currentConnectedDevice;
+  BleDevice? get lastKnownConnectedDevice;
+  Future<void> initialize();
   Future<void> startScan();
   Future<void> stopScan();
   Future<Either<BleFailure, void>> connectToDevice(String deviceId);
