@@ -1,3 +1,3 @@
-# agrigate
+# AgriGate
 
-A new Flutter project.
+Gateway to Better Agricultural Ecosytems.
