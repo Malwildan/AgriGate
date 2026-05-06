@@ -37,9 +37,13 @@ class LahanListLoading extends LahanListState {
 }
 
 class LahanListLoaded extends LahanListState {
-  const LahanListLoaded(this.lahanList);
+  const LahanListLoaded(this.lahanList, {this.syncError});
 
   final List<Lahan> lahanList;
+
+  /// Non-null when the last sync attempt failed. The list is still shown
+  /// using local data; the UI should surface this as a dismissible banner.
+  final String? syncError;
 
   int get totalScans =>
       lahanList.fold(0, (sum, e) => sum + e.scanHistory.length);
@@ -47,7 +51,11 @@ class LahanListLoaded extends LahanListState {
       lahanList.where((e) => e.status == LahanStatus.aktif).length;
 
   @override
-  List<Object?> get props => [lahanList];
+  List<Object?> get props => [lahanList, syncError];
+}
+
+class LahanListRefreshing extends LahanListState {
+  const LahanListRefreshing();
 }
 
 class LahanListError extends LahanListState {
@@ -62,33 +70,45 @@ class LahanListError extends LahanListState {
 // ─── BLoC ─────────────────────────────────────────────────────────────────────
 
 class LahanListBloc extends Bloc<LahanListEvent, LahanListState> {
-  LahanListBloc(this._getAllLahan) : super(const LahanListInitial()) {
+  LahanListBloc(this._getAllLahan, this._syncLahanData)
+      : super(const LahanListInitial()) {
     on<LahanListLoadRequested>(_onLoad);
     on<LahanListRefreshRequested>(_onRefresh);
   }
 
   final GetAllLahanUseCase _getAllLahan;
+  final SyncLahanDataUseCase _syncLahanData;
 
   Future<void> _onLoad(
     LahanListLoadRequested event,
     Emitter<LahanListState> emit,
   ) async {
     emit(const LahanListLoading());
-    await _fetchAndEmit(emit);
+    await _syncAndFetch(emit);
   }
 
   Future<void> _onRefresh(
     LahanListRefreshRequested event,
     Emitter<LahanListState> emit,
   ) async {
-    await _fetchAndEmit(emit);
+    emit(const LahanListRefreshing());
+    await _syncAndFetch(emit);
   }
 
-  Future<void> _fetchAndEmit(Emitter<LahanListState> emit) async {
+  Future<void> _syncAndFetch(Emitter<LahanListState> emit) async {
+    final syncResult = await _syncLahanData(const NoParams());
+    final syncError = syncResult.isLeft ? syncResult.left.message : null;
+    await _fetchAndEmit(emit, syncError: syncError);
+  }
+
+  Future<void> _fetchAndEmit(
+    Emitter<LahanListState> emit, {
+    String? syncError,
+  }) async {
     final result = await _getAllLahan(const NoParams());
     result.fold(
       (failure) => emit(LahanListError(failure.message)),
-      (list) => emit(LahanListLoaded(list)),
+      (list) => emit(LahanListLoaded(list, syncError: syncError)),
     );
   }
 }

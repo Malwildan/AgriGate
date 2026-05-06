@@ -38,7 +38,7 @@ class _AgriGateAppState extends State<AgriGateApp>
   }
 
   Future<void> _applyFullscreenMode() async {
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
 
   @override

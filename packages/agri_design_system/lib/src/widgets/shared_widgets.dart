@@ -409,8 +409,11 @@ class _TopoPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
 
-    final sx = size.width / 400;
-    final sy = size.height / 400;
+    // Use a uniform "cover" scale so the pattern is never distorted on
+    // cards whose aspect ratio differs from the 400×400 design space.
+    final s = (size.width / 400).clamp(size.height / 400, double.infinity);
+    final sx = s;
+    final sy = s;
 
     void drawCurve(List<Offset> pts) {
       if (pts.length < 3) return;
@@ -427,38 +430,84 @@ class _TopoPainter extends CustomPainter {
           mid.dy,
         );
       }
+      // close to last point
+      final last = pts.last;
+      path.lineTo(last.dx * sx, last.dy * sy);
       canvas.drawPath(path, paint);
     }
 
+    // 10 contour lines — full top-to-bottom coverage with organic undulation
     drawCurve([
-      const Offset(-20, 80),
-      const Offset(80, 40),
-      const Offset(180, 90),
-      const Offset(420, 110)
+      const Offset(-20, 18),
+      const Offset(70, 6),
+      const Offset(170, 22),
+      const Offset(280, 8),
+      const Offset(370, 20),
+      const Offset(420, 14),
     ]);
     drawCurve([
-      const Offset(-20, 130),
-      const Offset(90, 100),
-      const Offset(200, 140),
-      const Offset(420, 160)
+      const Offset(-20, 62),
+      const Offset(60, 48),
+      const Offset(150, 70),
+      const Offset(260, 52),
+      const Offset(360, 66),
+      const Offset(420, 58),
     ]);
     drawCurve([
-      const Offset(-20, 200),
-      const Offset(100, 160),
-      const Offset(220, 210),
-      const Offset(420, 220)
+      const Offset(-20, 108),
+      const Offset(75, 90),
+      const Offset(165, 118),
+      const Offset(245, 96),
+      const Offset(330, 112),
+      const Offset(420, 104),
     ]);
     drawCurve([
-      const Offset(-20, 260),
-      const Offset(110, 230),
-      const Offset(240, 270),
-      const Offset(420, 280)
+      const Offset(-20, 158),
+      const Offset(65, 140),
+      const Offset(150, 168),
+      const Offset(230, 150),
+      const Offset(320, 160),
+      const Offset(420, 152),
     ]);
     drawCurve([
-      const Offset(-20, 320),
-      const Offset(100, 290),
-      const Offset(230, 330),
-      const Offset(420, 340)
+      const Offset(-20, 204),
+      const Offset(80, 186),
+      const Offset(165, 214),
+      const Offset(255, 195),
+      const Offset(345, 208),
+      const Offset(420, 200),
+    ]);
+    drawCurve([
+      const Offset(-20, 252),
+      const Offset(85, 236),
+      const Offset(175, 260),
+      const Offset(270, 242),
+      const Offset(355, 256),
+      const Offset(420, 248),
+    ]);
+    drawCurve([
+      const Offset(-20, 300),
+      const Offset(72, 284),
+      const Offset(162, 308),
+      const Offset(258, 290),
+      const Offset(348, 304),
+      const Offset(420, 296),
+    ]);
+    drawCurve([
+      const Offset(-20, 346),
+      const Offset(80, 330),
+      const Offset(170, 354),
+      const Offset(265, 336),
+      const Offset(355, 350),
+      const Offset(420, 342),
+    ]);
+    drawCurve([
+      const Offset(-20, 388),
+      const Offset(90, 374),
+      const Offset(185, 396),
+      const Offset(280, 378),
+      const Offset(370, 392),
+      const Offset(420, 384),
     ]);
 
     void drawEllipse(double cx, double cy, double rx, double ry) {
@@ -472,13 +521,22 @@ class _TopoPainter extends CustomPainter {
       );
     }
 
-    drawEllipse(120, 200, 80, 50);
-    drawEllipse(120, 200, 55, 32);
-    drawEllipse(120, 200, 30, 16);
-    drawEllipse(290, 120, 60, 38);
-    drawEllipse(290, 120, 38, 22);
-    drawEllipse(320, 300, 70, 42);
-    drawEllipse(320, 300, 44, 24);
+    // 4 topo-ring clusters spread across the canvas
+    drawEllipse(110, 190, 88, 54);
+    drawEllipse(110, 190, 62, 36);
+    drawEllipse(110, 190, 36, 20);
+    drawEllipse(110, 190, 16, 9);
+
+    drawEllipse(300, 80, 68, 42);
+    drawEllipse(300, 80, 44, 26);
+    drawEllipse(300, 80, 22, 13);
+
+    drawEllipse(270, 320, 76, 46);
+    drawEllipse(270, 320, 50, 30);
+    drawEllipse(270, 320, 26, 16);
+
+    drawEllipse(60, 60, 48, 30);
+    drawEllipse(60, 60, 28, 17);
   }
 
   @override

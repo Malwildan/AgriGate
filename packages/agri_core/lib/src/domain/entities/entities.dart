@@ -143,20 +143,20 @@ class CropRecommendation extends Equatable {
 class ScanRecord extends Equatable {
   const ScanRecord({
     required this.id,
-    required this.date,
+    required this.recordedAt,
     required this.ph,
     required this.moisture,
     required this.recommendation,
   });
 
   final int id;
-  final String date;
+  final DateTime recordedAt;
   final double ph;
   final int moisture;
   final String recommendation;
 
   @override
-  List<Object?> get props => [id, date, ph, moisture, recommendation];
+  List<Object?> get props => [id, recordedAt, ph, moisture, recommendation];
 }
 
 // ─── Scan Data ────────────────────────────────────────────────────────────────
@@ -212,8 +212,16 @@ class Lahan extends Equatable {
   final LahanStatus status;
   final List<ScanRecord> scanHistory;
 
-  ScanRecord? get latestScan =>
-      scanHistory.isNotEmpty ? scanHistory.first : null;
+  ScanRecord? get latestScan {
+    if (scanHistory.isEmpty) {
+      return null;
+    }
+    return scanHistory.reduce(
+      (latest, current) => current.recordedAt.isAfter(latest.recordedAt)
+          ? current
+          : latest,
+    );
+  }
 
   Lahan copyWith({
     int? id,

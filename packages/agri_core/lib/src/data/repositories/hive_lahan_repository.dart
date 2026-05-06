@@ -13,7 +13,9 @@ class HiveLahanRepository implements LahanRepository {
 
   final Box<LahanModel> _box;
 
-  static Future<HiveLahanRepository> open() async {
+  static Future<HiveLahanRepository> open({
+    bool enableDemoSeed = true,
+  }) async {
     if (!Hive.isAdapterRegistered(0)) {
       Hive.registerAdapter(ScanRecordModelAdapter());
     }
@@ -23,11 +25,35 @@ class HiveLahanRepository implements LahanRepository {
     final box = await Hive.openBox<LahanModel>(_lahanBoxName);
 
     // Seed initial data if empty
-    if (box.isEmpty) {
+    if (box.isEmpty && enableDemoSeed) {
       await _seedInitialData(box);
     }
 
     return HiveLahanRepository(box);
+  }
+
+  Future<List<LahanModel>> getAllLocalModels({
+    bool includeDeleted = false,
+  }) async {
+    return _box.values
+        .where((model) => includeDeleted || model.deletedAt == null)
+        .toList();
+  }
+
+  Future<LahanModel?> getLocalModelById(int id) async => _box.get(id);
+
+  Future<void> putLocalModel(LahanModel model) async {
+    await _box.put(model.id, model);
+  }
+
+  Future<void> overwriteLocalCache(List<LahanModel> models) async {
+    final entries = <int, LahanModel>{
+      for (final model in models) model.id: model,
+    };
+    await _box.clear();
+    if (entries.isNotEmpty) {
+      await _box.putAll(entries);
+    }
   }
 
   static Future<void> _seedInitialData(Box<LahanModel> box) async {
@@ -38,10 +64,28 @@ class HiveLahanRepository implements LahanRepository {
         area: 'Lahan A – 2.4 ha',
         location: '-7.5461, 110.2178',
         status: LahanStatus.aktif,
-        scanHistory: const [
-          ScanRecord(id: 101, date: '28 Apr 2026', ph: 6.2, moisture: 40, recommendation: 'Jagung'),
-          ScanRecord(id: 102, date: '15 Mar 2026', ph: 6.5, moisture: 55, recommendation: 'Jagung'),
-          ScanRecord(id: 103, date: '02 Feb 2026', ph: 6.0, moisture: 48, recommendation: 'Jagung'),
+        scanHistory: [
+          ScanRecord(
+            id: 101,
+            recordedAt: DateTime.utc(2026, 4, 28),
+            ph: 6.2,
+            moisture: 40,
+            recommendation: 'Jagung',
+          ),
+          ScanRecord(
+            id: 102,
+            recordedAt: DateTime.utc(2026, 3, 15),
+            ph: 6.5,
+            moisture: 55,
+            recommendation: 'Jagung',
+          ),
+          ScanRecord(
+            id: 103,
+            recordedAt: DateTime.utc(2026, 2, 2),
+            ph: 6.0,
+            moisture: 48,
+            recommendation: 'Jagung',
+          ),
         ],
       ),
       Lahan(
@@ -50,9 +94,21 @@ class HiveLahanRepository implements LahanRepository {
         area: 'Lahan B – 1.8 ha',
         location: '-6.9175, 107.6191',
         status: LahanStatus.aktif,
-        scanHistory: const [
-          ScanRecord(id: 201, date: '25 Apr 2026', ph: 7.1, moisture: 72, recommendation: 'Padi'),
-          ScanRecord(id: 202, date: '10 Mar 2026', ph: 6.9, moisture: 68, recommendation: 'Jagung'),
+        scanHistory: [
+          ScanRecord(
+            id: 201,
+            recordedAt: DateTime.utc(2026, 4, 25),
+            ph: 7.1,
+            moisture: 72,
+            recommendation: 'Padi',
+          ),
+          ScanRecord(
+            id: 202,
+            recordedAt: DateTime.utc(2026, 3, 10),
+            ph: 6.9,
+            moisture: 68,
+            recommendation: 'Jagung',
+          ),
         ],
       ),
       Lahan(
@@ -61,21 +117,37 @@ class HiveLahanRepository implements LahanRepository {
         area: 'Lahan C – 1.2 ha',
         location: '-8.1653, 113.7160',
         status: LahanStatus.perencanaan,
-        scanHistory: const [
-          ScanRecord(id: 301, date: '21 Apr 2026', ph: 5.8, moisture: 52, recommendation: 'Singkong'),
+        scanHistory: [
+          ScanRecord(
+            id: 301,
+            recordedAt: DateTime.utc(2026, 4, 21),
+            ph: 5.8,
+            moisture: 52,
+            recommendation: 'Singkong',
+          ),
         ],
       ),
     ];
 
     for (final entry in entries) {
-      await box.put(entry.id, LahanModel.fromDomain(entry));
+      await box.put(
+        entry.id,
+        LahanModel.fromDomain(
+          entry,
+          createdAt: DateTime.utc(2026, 1, 1),
+          updatedAt: entry.latestScan?.recordedAt ?? DateTime.utc(2026, 1, 1),
+        ),
+      );
     }
   }
 
   @override
   Future<Either<Failure, List<Lahan>>> getAllLahan() async {
     try {
-      final list = _box.values.map((m) => m.toDomain()).toList();
+      final list = _box.values
+          .where((model) => model.deletedAt == null)
+          .map((model) => model.toDomain())
+          .toList();
       return Right(list);
     } catch (e) {
       return Left(CacheFailure('Gagal memuat daftar lahan: $e'));
@@ -86,7 +158,9 @@ class HiveLahanRepository implements LahanRepository {
   Future<Either<Failure, Lahan>> getLahanById(int id) async {
     try {
       final model = _box.get(id);
-      if (model == null) return const Left(CacheFailure('Lahan tidak ditemukan.'));
+      if (model == null || model.deletedAt != null) {
+        return const Left(CacheFailure('Lahan tidak ditemukan.'));
+      }
       return Right(model.toDomain());
     } catch (e) {
       return Left(CacheFailure('Gagal memuat lahan: $e'));
@@ -96,7 +170,11 @@ class HiveLahanRepository implements LahanRepository {
   @override
   Future<Either<Failure, Lahan>> addLahan(Lahan lahan) async {
     try {
-      final model = LahanModel.fromDomain(lahan);
+      final model = LahanModel.fromDomain(
+        lahan,
+        createdAt: DateTime.now().toUtc(),
+        updatedAt: DateTime.now().toUtc(),
+      );
       await _box.put(lahan.id, model);
       return Right(lahan);
     } catch (e) {
@@ -107,7 +185,13 @@ class HiveLahanRepository implements LahanRepository {
   @override
   Future<Either<Failure, Lahan>> updateLahan(Lahan lahan) async {
     try {
-      final model = LahanModel.fromDomain(lahan);
+      final existing = _box.get(lahan.id);
+      final model = LahanModel.fromDomain(
+        lahan,
+        createdAt: existing?.effectiveCreatedAt ?? DateTime.now().toUtc(),
+        updatedAt: DateTime.now().toUtc(),
+        deletedAt: existing?.deletedAt,
+      );
       await _box.put(lahan.id, model);
       return Right(lahan);
     } catch (e) {
@@ -118,7 +202,14 @@ class HiveLahanRepository implements LahanRepository {
   @override
   Future<Either<Failure, void>> deleteLahan(int id) async {
     try {
-      await _box.delete(id);
+      final existing = _box.get(id);
+      if (existing == null) {
+        return const Right(null);
+      }
+      existing
+        ..updatedAt = DateTime.now().toUtc()
+        ..deletedAt = existing.updatedAt;
+      await _box.put(id, existing);
       return const Right(null);
     } catch (e) {
       return Left(CacheFailure('Gagal menghapus lahan: $e'));

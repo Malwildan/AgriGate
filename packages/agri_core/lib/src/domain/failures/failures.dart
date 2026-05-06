@@ -14,6 +14,18 @@ class CacheFailure extends Failure {
   const CacheFailure([super.message = 'Gagal membaca data lokal.']);
 }
 
+class AuthFailure extends Failure {
+  const AuthFailure([super.message = 'Autentikasi backend gagal.']);
+}
+
+class NetworkFailure extends Failure {
+  const NetworkFailure([super.message = 'Koneksi jaringan ke backend gagal.']);
+}
+
+class SyncFailure extends Failure {
+  const SyncFailure([super.message = 'Sinkronisasi data gagal.']);
+}
+
 class BleFailure extends Failure {
   const BleFailure([super.message = 'Koneksi Bluetooth gagal.']);
 }

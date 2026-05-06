@@ -18,26 +18,29 @@ class ScanRecordModelAdapter extends TypeAdapter<ScanRecordModel> {
     };
     return ScanRecordModel()
       ..id = fields[0] as int
-      ..date = fields[1] as String
+      ..legacyDateLabel = fields[1] as String?
       ..ph = fields[2] as double
       ..moisture = fields[3] as int
-      ..recommendation = fields[4] as String;
+      ..recommendation = fields[4] as String
+      ..recordedAt = fields[5] as DateTime?;
   }
 
   @override
   void write(BinaryWriter writer, ScanRecordModel obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.date)
+      ..write(obj.legacyDateLabel)
       ..writeByte(2)
       ..write(obj.ph)
       ..writeByte(3)
       ..write(obj.moisture)
       ..writeByte(4)
-      ..write(obj.recommendation);
+      ..write(obj.recommendation)
+      ..writeByte(5)
+      ..write(obj.recordedAt);
   }
 
   @override
@@ -67,13 +70,16 @@ class LahanModelAdapter extends TypeAdapter<LahanModel> {
       ..area = fields[2] as String
       ..location = fields[3] as String
       ..status = fields[4] as String
-      ..scanHistory = (fields[5] as List).cast<ScanRecordModel>();
+      ..scanHistory = (fields[5] as List).cast<ScanRecordModel>()
+      ..createdAt = fields[6] as DateTime?
+      ..updatedAt = fields[7] as DateTime?
+      ..deletedAt = fields[8] as DateTime?;
   }
 
   @override
   void write(BinaryWriter writer, LahanModel obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -85,7 +91,13 @@ class LahanModelAdapter extends TypeAdapter<LahanModel> {
       ..writeByte(4)
       ..write(obj.status)
       ..writeByte(5)
-      ..write(obj.scanHistory);
+      ..write(obj.scanHistory)
+      ..writeByte(6)
+      ..write(obj.createdAt)
+      ..writeByte(7)
+      ..write(obj.updatedAt)
+      ..writeByte(8)
+      ..write(obj.deletedAt);
   }
 
   @override

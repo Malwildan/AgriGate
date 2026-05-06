@@ -18,6 +18,15 @@ const _cropImages = {
   'Gandum': 'https://images.unsplash.com/photo-1657626625832-2c0851cdaa9b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',
 };
 
+String _formatRecordedAt(DateTime value) {
+  const months = [
+    '', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+    'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des',
+  ];
+  final day = value.day.toString().padLeft(2, '0');
+  return '$day ${months[value.month]} ${value.year}';
+}
+
 class DetailHeroCard extends StatelessWidget {
   const DetailHeroCard({
     super.key,
@@ -124,7 +133,9 @@ class DetailHeroCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 Text(
-                  'SCAN TERAKHIR · ${latest.date}'.toUpperCase(),
+                  'SCAN TERAKHIR · '
+                      '${_formatRecordedAt(latest.recordedAt)}'
+                          .toUpperCase(),
                   style: AgriTypography.sectionLabel.copyWith(
                     color: AgriColors.lime,
                     letterSpacing: 1.4,

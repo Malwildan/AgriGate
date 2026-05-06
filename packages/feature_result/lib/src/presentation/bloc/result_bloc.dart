@@ -64,6 +64,7 @@ class ResultReady extends ResultState {
     required this.lahanId,
     required this.ownerName,
     required this.lahanArea,
+    required this.location,
     required this.dateLabel,
   });
 
@@ -72,11 +73,12 @@ class ResultReady extends ResultState {
   final int lahanId;
   final String ownerName;
   final String lahanArea;
+    final String location;
   final String dateLabel;
 
   @override
   List<Object?> get props =>
-      [scanData, recommendation, lahanId, ownerName, lahanArea, dateLabel];
+      [scanData, recommendation, lahanId, ownerName, lahanArea, location, dateLabel];
 }
 
 class ResultSaving extends ResultState {
@@ -103,7 +105,7 @@ class ResultError extends ResultState {
 // ─── BLoC ─────────────────────────────────────────────────────────────────────
 
 class ResultBloc extends Bloc<ResultEvent, ResultState> {
-  ResultBloc(this._saveScanResult, this._getWeather)
+  ResultBloc(this._saveScanResult, this._getWeather, this._syncLahanData)
       : super(const ResultInitial()) {
     on<ResultInitialized>(_onInitialized);
     on<ResultSaveRequested>(_onSaveRequested);
@@ -111,6 +113,7 @@ class ResultBloc extends Bloc<ResultEvent, ResultState> {
 
   final SaveScanResultUseCase _saveScanResult;
   final GetWeatherUseCase _getWeather;
+  final SyncLahanDataUseCase _syncLahanData;
 
   Future<void> _onInitialized(
     ResultInitialized event,
@@ -140,6 +143,7 @@ class ResultBloc extends Bloc<ResultEvent, ResultState> {
       lahanId: event.lahanId,
       ownerName: event.ownerName,
       lahanArea: event.lahanArea,
+      location: event.location,
       dateLabel: _formatDate(DateTime.now()),
     ));
   }
@@ -157,12 +161,18 @@ class ResultBloc extends Bloc<ResultEvent, ResultState> {
       lahanId: ready.lahanId,
       ph: ready.scanData.ph,
       moisture: ready.scanData.moisture,
+      owner: ready.ownerName,
+      area: ready.lahanArea,
+      location: ready.location,
     ));
 
-    result.fold(
-      (failure) => emit(ResultError(failure.message)),
-      (lahan) => emit(ResultSaved(lahan.id)),
-    );
+    if (result.isLeft) {
+      emit(ResultError(result.left.message));
+      return;
+    }
+
+    await _syncLahanData(const NoParams());
+    emit(ResultSaved(result.right.id));
   }
 
   /// Parses "lat, lon" strings produced by the GPS capture service.

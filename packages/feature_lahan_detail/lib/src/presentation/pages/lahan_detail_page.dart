@@ -16,11 +16,13 @@ class LahanDetailPage extends StatefulWidget {
     required this.lahanId,
     required this.onBack,
     required this.onRescan,
+    required this.onOpenHistoryRecord,
   });
 
   final int lahanId;
   final VoidCallback onBack;
   final ValueChanged<Lahan> onRescan;
+  final ValueChanged<ScanRecord> onOpenHistoryRecord;
 
   @override
   State<LahanDetailPage> createState() => _LahanDetailPageState();
@@ -42,8 +44,7 @@ class _LahanDetailPageState extends State<LahanDetailPage> {
           appBar: AgriAppBar(backLabel: 'Lahan', onBack: widget.onBack),
           body: switch (state) {
             DetailLoading() || DetailInitial() => _buildSkeleton(),
-            DetailLoaded(:final lahan) =>
-              _buildContent(context, lahan),
+            DetailLoaded(:final lahan) => _buildContent(context, lahan),
             DetailError(:final message) => _buildError(context, message),
           },
           bottomNavigationBar: state is DetailLoaded
@@ -98,6 +99,7 @@ class _LahanDetailPageState extends State<LahanDetailPage> {
                 SizedBox(height: 20.h),
                 ScanHistoryTimeline(
                   scanHistory: lahan.scanHistory,
+                  onRecordTap: widget.onOpenHistoryRecord,
                 ),
               ],
             ),

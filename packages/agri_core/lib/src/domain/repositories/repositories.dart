@@ -54,6 +54,12 @@ abstract interface class ScanRepository {
   });
 }
 
+// ─── Sync Repository ──────────────────────────────────────────────────────────
+
+abstract interface class SyncRepository {
+  Future<Either<Failure, void>> sync();
+}
+
 // ─── BLE Service ──────────────────────────────────────────────────────────────
 
 abstract interface class BleService {

@@ -46,8 +46,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/',
       builder: (context, state) => BlocProvider<LahanListBloc>(
-        create: (_) => LahanListBloc(getIt<GetAllLahanUseCase>())
-          ..add(const LahanListLoadRequested()),
+        create: (_) => LahanListBloc(
+          getIt<GetAllLahanUseCase>(),
+          getIt<SyncLahanDataUseCase>(),
+        )..add(const LahanListLoadRequested()),
         child: LahanListPage(
           onSelectLahan: (id) => context.push('/detail/$id'),
           onAddLahan: () => context.push('/scan'),
@@ -132,6 +134,7 @@ final appRouter = GoRouter(
           create: (_) => ResultBloc(
             getIt<SaveScanResultUseCase>(),
             getIt<GetWeatherUseCase>(),
+            getIt<SyncLahanDataUseCase>(),
           ),
           child: ResultPage(
             scanData: extra.scanData,
@@ -156,6 +159,26 @@ final appRouter = GoRouter(
       },
     ),
     GoRoute(
+      path: '/detail/:lahanId/history/:recordId',
+      builder: (context, state) {
+        final lahanId = int.parse(state.pathParameters['lahanId']!);
+        final recordId = int.parse(state.pathParameters['recordId']!);
+        return BlocProvider<DetailBloc>(
+          create: (_) => DetailBloc(
+            getLahanById: getIt<GetLahanByIdUseCase>(),
+            updateLahanStatus: getIt<UpdateLahanStatusUseCase>(),
+          ),
+          child: ScanHistoryDetailPage(
+            lahanId: lahanId,
+            recordId: recordId,
+            onBack: () => context.canPop()
+                ? context.pop()
+                : context.go('/detail/$lahanId'),
+          ),
+        );
+      },
+    ),
+    GoRoute(
       path: '/detail/:lahanId',
       builder: (context, state) {
         final lahanId = int.parse(state.pathParameters['lahanId']!);
@@ -174,6 +197,9 @@ final appRouter = GoRouter(
                 area: lahan.area,
                 location: lahan.location,
               ),
+            ),
+            onOpenHistoryRecord: (record) => context.push(
+              '/detail/$lahanId/history/${record.id}',
             ),
           ),
         );

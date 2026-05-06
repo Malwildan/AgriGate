@@ -11,7 +11,7 @@ class ScanRecordModel extends HiveObject {
   late int id;
 
   @HiveField(1)
-  late String date;
+  String? legacyDateLabel;
 
   @HiveField(2)
   late double ph;
@@ -22,9 +22,14 @@ class ScanRecordModel extends HiveObject {
   @HiveField(4)
   late String recommendation;
 
+  @HiveField(5)
+  DateTime? recordedAt;
+
   ScanRecord toDomain() => ScanRecord(
         id: id,
-        date: date,
+        recordedAt: recordedAt ??
+            _parseLegacyDateLabel(legacyDateLabel) ??
+            DateTime.fromMillisecondsSinceEpoch(id, isUtc: true),
         ph: ph,
         moisture: moisture,
         recommendation: recommendation,
@@ -33,10 +38,54 @@ class ScanRecordModel extends HiveObject {
   static ScanRecordModel fromDomain(ScanRecord record) {
     return ScanRecordModel()
       ..id = record.id
-      ..date = record.date
+      ..legacyDateLabel = null
       ..ph = record.ph
       ..moisture = record.moisture
-      ..recommendation = record.recommendation;
+      ..recommendation = record.recommendation
+      ..recordedAt = record.recordedAt.toUtc();
+  }
+
+  static DateTime? _parseLegacyDateLabel(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+
+    final parts = value.trim().split(RegExp(r'\s+'));
+    if (parts.length != 3) {
+      return null;
+    }
+
+    final day = int.tryParse(parts[0]);
+    final month = _monthFromLabel(parts[1]);
+    final year = int.tryParse(parts[2]);
+    if (day == null || month == null || year == null) {
+      return null;
+    }
+
+    return DateTime.utc(year, month, day);
+  }
+
+  static int? _monthFromLabel(String value) {
+    const months = {
+      'jan': 1,
+      'feb': 2,
+      'mar': 3,
+      'apr': 4,
+      'mei': 5,
+      'may': 5,
+      'jun': 6,
+      'jul': 7,
+      'ags': 8,
+      'agu': 8,
+      'aug': 8,
+      'sep': 9,
+      'okt': 10,
+      'oct': 10,
+      'nov': 11,
+      'des': 12,
+      'dec': 12,
+    };
+    return months[value.trim().toLowerCase()];
   }
 }
 
@@ -60,16 +109,53 @@ class LahanModel extends HiveObject {
   @HiveField(5)
   late List<ScanRecordModel> scanHistory;
 
-  Lahan toDomain() => Lahan(
-        id: id,
-        owner: owner,
-        area: area,
-        location: location,
-        status: LahanStatus.fromString(status),
-        scanHistory: scanHistory.map((m) => m.toDomain()).toList(),
-      );
+  @HiveField(6)
+  DateTime? createdAt;
 
-  static LahanModel fromDomain(Lahan lahan) {
+  @HiveField(7)
+  DateTime? updatedAt;
+
+  @HiveField(8)
+  DateTime? deletedAt;
+
+  DateTime get effectiveCreatedAt =>
+      createdAt ?? DateTime.fromMillisecondsSinceEpoch(id, isUtc: true);
+
+  DateTime get effectiveUpdatedAt {
+    if (updatedAt != null) {
+      return updatedAt!;
+    }
+    if (scanHistory.isEmpty) {
+      return effectiveCreatedAt;
+    }
+    final latestScan = scanHistory
+        .map((record) => record.toDomain().recordedAt)
+        .reduce((latest, current) => current.isAfter(latest) ? current : latest);
+    return latestScan;
+  }
+
+  Lahan toDomain() {
+    final orderedScanHistory = scanHistory.map((m) => m.toDomain()).toList()
+      ..sort((left, right) => right.recordedAt.compareTo(left.recordedAt));
+
+    return Lahan(
+      id: id,
+      owner: owner,
+      area: area,
+      location: location,
+      status: LahanStatus.fromString(status),
+      scanHistory: orderedScanHistory,
+    );
+  }
+
+  static LahanModel fromDomain(
+    Lahan lahan, {
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? deletedAt,
+  }) {
+    final created = createdAt ?? DateTime.now().toUtc();
+    final updated = updatedAt ?? created;
     return LahanModel()
       ..id = lahan.id
       ..owner = lahan.owner
@@ -77,6 +163,9 @@ class LahanModel extends HiveObject {
       ..location = lahan.location
       ..status = lahan.status.label
       ..scanHistory =
-          lahan.scanHistory.map(ScanRecordModel.fromDomain).toList();
+          lahan.scanHistory.map(ScanRecordModel.fromDomain).toList()
+      ..createdAt = created.toUtc()
+      ..updatedAt = updated.toUtc()
+      ..deletedAt = deletedAt?.toUtc();
   }
 }

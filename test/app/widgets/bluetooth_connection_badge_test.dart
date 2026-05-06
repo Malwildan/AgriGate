@@ -140,12 +140,12 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.text('Perangkat Saat Ini'), findsOneWidget);
-      expect(find.text('Ganti Perangkat'), findsOneWidget);
+      expect(find.text('Ganti'), findsOneWidget);
       expect(find.text('Putuskan'), findsOneWidget);
       expect(find.text('AgriSensor'), findsOneWidget);
       verifyNever(() => bleService.startScan());
 
-      await tester.tap(find.text('Ganti Perangkat'));
+      await tester.tap(find.text('Ganti'));
       await tester.pump();
       verify(() => bleService.startScan()).called(1);
 

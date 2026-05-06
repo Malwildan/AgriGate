@@ -24,6 +24,7 @@ dependencies:
 
   # Networking (seam for future API)
   dio: ^5.7.0
+  supabase_flutter: ^2.12.4
 
   # Local storage
   hive: ^2.2.3

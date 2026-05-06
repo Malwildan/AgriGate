@@ -4,10 +4,19 @@ import '../entities/entities.dart';
 import '../failures/failures.dart';
 import '../repositories/repositories.dart';
 
+const _maxHiveIntKey = 0xFFFFFFFF;
+
+DateTime _utcNow() => DateTime.now().toUtc();
+
+int _generateHiveCompatibleId(DateTime timestamp) {
+  final id = timestamp.millisecondsSinceEpoch & _maxHiveIntKey;
+  return id == 0 ? 1 : id;
+}
+
 // ─── Use Case base ────────────────────────────────────────────────────────────
 
-abstract class UseCase<Type, Params> {
-  Future<Either<Failure, Type>> call(Params params);
+abstract class UseCase<ResultType, Params> {
+  Future<Either<Failure, ResultType>> call(Params params);
 }
 
 class NoParams {
@@ -52,14 +61,17 @@ class AddLahanParams {
 }
 
 class AddLahanUseCase implements UseCase<Lahan, AddLahanParams> {
-  const AddLahanUseCase(this._repository);
+  AddLahanUseCase(this._repository, {DateTime Function()? now})
+      : _now = now ?? _utcNow;
 
   final LahanRepository _repository;
+  final DateTime Function() _now;
 
   @override
   Future<Either<Failure, Lahan>> call(AddLahanParams params) {
+    final now = _now();
     final lahan = Lahan(
-      id: DateTime.now().millisecondsSinceEpoch,
+      id: _generateHiveCompatibleId(now),
       owner: params.owner.trim().isEmpty ? 'Pemilik Baru' : params.owner.trim(),
       area: params.area.trim().isEmpty ? 'Lahan Baru' : params.area.trim(),
       location: params.location.trim(),
@@ -79,7 +91,8 @@ class UpdateLahanStatusParams {
   final LahanStatus status;
 }
 
-class UpdateLahanStatusUseCase implements UseCase<Lahan, UpdateLahanStatusParams> {
+class UpdateLahanStatusUseCase
+    implements UseCase<Lahan, UpdateLahanStatusParams> {
   const UpdateLahanStatusUseCase(this._repository);
 
   final LahanRepository _repository;
@@ -100,44 +113,95 @@ class SaveScanResultParams {
     required this.lahanId,
     required this.ph,
     required this.moisture,
+    this.owner = '',
+    this.area = '',
+    this.location = '',
   });
 
   final int lahanId;
   final double ph;
   final int moisture;
+  final String owner;
+  final String area;
+  final String location;
 }
 
 class SaveScanResultUseCase implements UseCase<Lahan, SaveScanResultParams> {
-  const SaveScanResultUseCase(this._scanRepository);
+  SaveScanResultUseCase(
+    this._scanRepository,
+    this._lahanRepository, {
+    DateTime Function()? now,
+  }) : _now = now ?? _utcNow;
 
   final ScanRepository _scanRepository;
+  final LahanRepository _lahanRepository;
+  final DateTime Function() _now;
 
   @override
   Future<Either<Failure, Lahan>> call(SaveScanResultParams params) async {
+    final now = _now();
     final rec = GetRecommendationUseCase.compute(
       ph: params.ph,
       moisture: params.moisture,
     );
     final record = ScanRecord(
-      id: DateTime.now().millisecondsSinceEpoch,
-      date: _formatDate(DateTime.now()),
+      id: now.microsecondsSinceEpoch,
+      recordedAt: now,
       ph: params.ph,
       moisture: params.moisture,
       recommendation: rec.main,
     );
+
+    final lahanIdResult = params.lahanId > 0
+        ? Right<Failure, int>(params.lahanId)
+        : await _createLahan(
+            owner: params.owner,
+            area: params.area,
+            location: params.location,
+          );
+
+    if (lahanIdResult.isLeft) {
+      return Left(lahanIdResult.left);
+    }
+
     return _scanRepository.saveScanResult(
-      lahanId: params.lahanId,
+      lahanId: lahanIdResult.right,
       record: record,
     );
   }
 
-  String _formatDate(DateTime dt) {
-    const months = [
-      '', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-      'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des',
-    ];
-    return '${dt.day} ${months[dt.month]} ${dt.year}';
+  Future<Either<Failure, int>> _createLahan({
+    required String owner,
+    required String area,
+    required String location,
+  }) async {
+    final now = _now();
+    final lahan = Lahan(
+      id: _generateHiveCompatibleId(now),
+      owner: owner.trim().isEmpty ? 'Pemilik Baru' : owner.trim(),
+      area: area.trim().isEmpty ? 'Lahan Baru' : area.trim(),
+      location: location.trim(),
+      status: LahanStatus.aktif,
+      scanHistory: const [],
+    );
+
+    final result = await _lahanRepository.addLahan(lahan);
+    return result.fold(
+      Left.new,
+      (value) => Right(value.id),
+    );
   }
+}
+
+// ─── SyncLahanData ────────────────────────────────────────────────────────────
+
+class SyncLahanDataUseCase implements UseCase<void, NoParams> {
+  const SyncLahanDataUseCase(this._repository);
+
+  final SyncRepository _repository;
+
+  @override
+  Future<Either<Failure, void>> call(NoParams params) => _repository.sync();
 }
 
 // ─── GetWeather ───────────────────────────────────────────────────────────────
@@ -251,8 +315,7 @@ class GetRecommendationUseCase {
           CropAlternative(name: 'Kangkung', icon: CropIconKind.leaf),
           CropAlternative(name: 'Bayam', icon: CropIconKind.flower),
         ];
-        soilInsight =
-            'Prakiraan curah hujan 6 bulan sangat tinggi '
+        soilInsight = 'Prakiraan curah hujan 6 bulan sangat tinggi '
             '(${weather.precipitationTotal.toStringAsFixed(0)} mm) '
             'mendukung kuat tanaman toleran air meskipun kondisi tanah '
             '${phLabel.toLowerCase()}.';
@@ -263,8 +326,7 @@ class GetRecommendationUseCase {
           CropAlternative(name: 'Sorgum', icon: CropIconKind.grain),
           CropAlternative(name: 'Kacang Tanah', icon: CropIconKind.flower),
         ];
-        soilInsight =
-            'Prakiraan musiman kering (total 6 bulan: '
+        soilInsight = 'Prakiraan musiman kering (total 6 bulan: '
             '${weather.precipitationTotal.toStringAsFixed(0)} mm, '
             'ET₀ harian: ${weather.et0Mean.toStringAsFixed(1)} mm/hari) '
             'menyarankan tanaman tahan kekeringan.';
@@ -287,18 +349,15 @@ class GetRecommendationUseCase {
             'pertimbangkan varietas adaptif suhu rendah.');
       }
       if (drought) {
-        parts.add(
-            'Risiko kekeringan musiman: total curah hujan 6 bulan hanya '
+        parts.add('Risiko kekeringan musiman: total curah hujan 6 bulan hanya '
             '${weather.precipitationTotal.toStringAsFixed(0)} mm – '
             'irigasi penuh sangat disarankan.');
       } else if (highRain) {
-        parts.add(
-            'Curah hujan musiman sangat tinggi '
+        parts.add('Curah hujan musiman sangat tinggi '
             '(${weather.precipitationTotal.toStringAsFixed(0)} mm / 6 bulan) – '
             'pastikan drainase lahan memadai.');
       } else {
-        parts.add(
-            'Total curah hujan 6 bulan: '
+        parts.add('Total curah hujan 6 bulan: '
             '${weather.precipitationTotal.toStringAsFixed(0)} mm, '
             'ET₀ harian rata-rata: ${weather.et0Mean.toStringAsFixed(1)} mm/hari.');
       }

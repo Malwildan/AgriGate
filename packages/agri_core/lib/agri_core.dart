@@ -9,5 +9,8 @@ export 'src/domain/usecases/usecases.dart';
 
 // Data
 export 'src/data/models/lahan_model.dart';
+export 'src/data/repositories/offline_first_lahan_repository.dart';
 export 'src/data/repositories/hive_lahan_repository.dart';
 export 'src/data/repositories/open_meteo_weather_repository.dart';
+export 'src/data/repositories/supabase_lahan_remote_data_source.dart';
+export 'src/data/repositories/supabase_session_service.dart';

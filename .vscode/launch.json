@@ -5,9 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "agrigate",
+            "name": "AgriGate",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "toolArgs": [
+                "--dart-define-from-file=.env.json"
+            ]
         },
         {
             "name": "agrigate (profile mode)",
