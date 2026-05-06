@@ -1,6 +1,6 @@
 # AgriGate
 
-Gateway to Better Agricultural Ecosystems.
+Gateway to a Better Agricultural Ecosystems.
 
 ## Local Setup
 
