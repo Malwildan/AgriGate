@@ -1,4 +1,4 @@
-library feature_result;
+library;
 
 export 'src/presentation/bloc/result_bloc.dart';
 export 'src/presentation/pages/result_page.dart';

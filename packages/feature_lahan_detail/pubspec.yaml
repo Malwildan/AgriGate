@@ -13,11 +13,11 @@ dependencies:
   flutter_bloc: ^8.1.6
   equatable: ^2.0.5
   flutter_screenutil: ^5.9.3
+  skeletonizer: ^2.1.3
   agri_core:
     path: ../agri_core
   agri_design_system:
     path: ../agri_design_system
-
 dev_dependencies:
   flutter_test:
     sdk: flutter

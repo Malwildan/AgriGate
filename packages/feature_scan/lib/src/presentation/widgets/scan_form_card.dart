@@ -216,6 +216,7 @@ class _GpsFieldState extends State<_GpsField> {
             SizedBox(width: 8.w),
             _GpsIconButton(
               onTap: widget.isCapturing ? null : widget.onGpsRequested,
+              bgColor: AgriColors.lime,
               child: widget.isCapturing
                   ? const SizedBox(
                       width: 20,
@@ -228,7 +229,6 @@ class _GpsFieldState extends State<_GpsField> {
                     )
                   : const Icon(Icons.location_on_rounded,
                       size: 20, color: AgriColors.forest),
-              bgColor: AgriColors.lime,
             ),
 
           ],

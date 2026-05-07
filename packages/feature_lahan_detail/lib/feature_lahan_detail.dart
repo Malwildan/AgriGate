@@ -1,4 +1,4 @@
-library feature_lahan_detail;
+library;
 
 export 'src/presentation/bloc/detail_bloc.dart';
 export 'src/presentation/pages/lahan_detail_page.dart';

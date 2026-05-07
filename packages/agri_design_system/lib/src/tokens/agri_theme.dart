@@ -36,8 +36,6 @@ abstract final class AgriTheme {
         onError: AgriColors.onError,
         outline: AgriColors.border,
         outlineVariant: AgriColors.borderStrong,
-        background: AgriColors.background,
-        onBackground: AgriColors.ink,
       );
 
   static AppBarTheme get _appBarTheme => const AppBarTheme(

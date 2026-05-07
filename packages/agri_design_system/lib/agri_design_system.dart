@@ -1,4 +1,4 @@
-library agri_design_system;
+library;
 
 export 'src/tokens/agri_colors.dart';
 export 'src/tokens/agri_typography.dart';

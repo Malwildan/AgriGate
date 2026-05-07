@@ -1,4 +1,4 @@
-library agri_core;
+library;
 export 'src/domain/entities/entities.dart';
 export 'src/domain/failures/failures.dart';
 export 'src/domain/repositories/repositories.dart';

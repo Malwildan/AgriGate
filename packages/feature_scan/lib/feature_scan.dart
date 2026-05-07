@@ -1,4 +1,4 @@
-library feature_scan;
+library;
 
 export 'src/presentation/bloc/scan_bloc.dart';
 export 'src/presentation/pages/scan_page.dart';

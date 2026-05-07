@@ -234,7 +234,7 @@ class RailwayCropRepository implements CropRecommendationRepository {
       String main, String phLabel, String moistureLabel) {
     return 'Berdasarkan analisis pH ${phLabel.toLowerCase()} dan kelembapan '
         '${moistureLabel.toLowerCase()} serta kondisi cuaca setempat, '
-        '${main} direkomendasikan sebagai tanaman yang paling sesuai untuk lahan Anda.';
+        '$main direkomendasikan sebagai tanaman yang paling sesuai untuk lahan Anda.';
   }
 
   static String _buildClimateInsight(double temp, double rainfall90d) {
