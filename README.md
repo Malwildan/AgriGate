@@ -2,6 +2,8 @@
 
 Gateway to a Better Agricultural Ecosystems.
 
+Catatan: Aplikasi akan bekerja maksimal jika digunakan bersama alat pendukung yang sesuai.
+
 ## Local Setup
 
 1. Edit `.env.json` with your Supabase project URL and anon key.
