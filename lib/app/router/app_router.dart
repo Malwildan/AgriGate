@@ -1,4 +1,3 @@
-// App router — go_router config with all feature routes.
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -9,8 +8,6 @@ import 'package:feature_result/feature_result.dart';
 import 'package:feature_lahan_detail/feature_lahan_detail.dart';
 import '../di/injection.dart';
 import '../widgets/bluetooth_connection_badge.dart';
-
-/// Extra payload passed on /result route.
 class ResultRouteExtra {
   const ResultRouteExtra({
     required this.scanData,
@@ -26,8 +23,6 @@ class ResultRouteExtra {
   final String lahanArea;
   final String lahanLocation;
 }
-
-/// Extra payload passed on /scan/:lahanId route for rescan.
 class RescanRouteExtra {
   const RescanRouteExtra({
     required this.owner,
@@ -133,7 +128,7 @@ final appRouter = GoRouter(
         return BlocProvider<ResultBloc>(
           create: (_) => ResultBloc(
             getIt<SaveScanResultUseCase>(),
-            getIt<GetWeatherUseCase>(),
+            getIt<GetCropRecommendationUseCase>(),
             getIt<SyncLahanDataUseCase>(),
           ),
           child: ResultPage(

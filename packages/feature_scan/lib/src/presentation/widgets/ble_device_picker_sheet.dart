@@ -1,12 +1,3 @@
-// BleDevicePickerSheet — modal bottom sheet for scanning & connecting to a BLE device.
-//
-// Internal phases:
-//   scanning   → device list + scan controls
-//   connecting → animated progress + cancel (dispatches ScanBleDeviceSelected directly)
-//   error      → error message + retry / close
-//
-// The sheet auto-dismisses on successful connection. The caller does not need
-// to handle the selected device — the sheet drives the bloc itself.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -157,8 +148,6 @@ class _BleDevicePickerSheetState extends State<BleDevicePickerSheet> {
     );
   }
 }
-
-// ─── Scanning body ────────────────────────────────────────────────────────────
 
 class _ScanningBody extends StatelessWidget {
   const _ScanningBody({
@@ -461,8 +450,6 @@ class _ConnectedDevicePanel extends StatelessWidget {
   }
 }
 
-// ─── Connecting body ──────────────────────────────────────────────────────────
-
 class _ConnectingBody extends StatelessWidget {
   const _ConnectingBody({
     super.key,
@@ -480,7 +467,6 @@ class _ConnectingBody extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 0),
       child: Column(
         children: [
-          // Handle
           Container(
             width: 40,
             height: 4,
@@ -490,7 +476,6 @@ class _ConnectingBody extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          // Indicator with icon in centre
           Stack(
             alignment: Alignment.center,
             children: [
@@ -567,8 +552,6 @@ class _ConnectingBody extends StatelessWidget {
   }
 }
 
-// ─── Error body ───────────────────────────────────────────────────────────────
-
 class _ErrorBody extends StatelessWidget {
   const _ErrorBody({
     super.key,
@@ -590,7 +573,6 @@ class _ErrorBody extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 0),
       child: Column(
         children: [
-          // Handle
           Container(
             width: 40,
             height: 4,
@@ -695,8 +677,6 @@ class _ErrorBody extends StatelessWidget {
   }
 }
 
-// ─── Scan button ──────────────────────────────────────────────────────────────
-
 class _ScanButton extends StatelessWidget {
   const _ScanButton({required this.isScanning, required this.onTap});
 
@@ -746,8 +726,6 @@ class _ScanButton extends StatelessWidget {
   }
 }
 
-// ─── Empty / loading state ────────────────────────────────────────────────────
-
 class _EmptyScanState extends StatelessWidget {
   const _EmptyScanState({required this.isScanning});
 
@@ -792,8 +770,6 @@ class _EmptyScanState extends StatelessWidget {
     );
   }
 }
-
-// ─── Device list tile ─────────────────────────────────────────────────────────
 
 class _DeviceListTile extends StatelessWidget {
   const _DeviceListTile({required this.device, required this.onTap});

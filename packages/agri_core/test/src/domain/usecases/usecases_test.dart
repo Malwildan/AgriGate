@@ -94,6 +94,7 @@ void main() {
           lahanId: 0,
           ph: 6.5,
           moisture: 55,
+          recommendation: 'Jagung',
           owner: 'Pak Budi',
           area: 'Lahan A',
           location: '-7.54, 110.21',

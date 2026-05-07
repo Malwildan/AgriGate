@@ -1,4 +1,3 @@
-// Result Page — recommendation hero, insight, soil metrics, and save CTA.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -31,8 +30,6 @@ class ResultPage extends StatefulWidget {
   final VoidCallback onScanAgain;
   final ValueChanged<int> onSaved;
   final VoidCallback onBack;
-
-  /// GPS "lat, lon" string used to enrich the recommendation with weather data.
   final String location;
 
   @override
@@ -91,7 +88,6 @@ class _ResultPageState extends State<ResultPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Secondary: Scan Ulang
                       GestureDetector(
                         onTap: isSaving ? null : widget.onScanAgain,
                         child: AnimatedContainer(
@@ -132,7 +128,6 @@ class _ResultPageState extends State<ResultPage> {
                         ),
                       ),
                       SizedBox(height: 10.h),
-                      // Primary: Simpan Riwayat
                       AgriPrimaryButton(
                         label: 'Simpan Riwayat',
                         icon: Icons.save_rounded,
@@ -161,7 +156,7 @@ class _ResultPageState extends State<ResultPage> {
           const CircularProgressIndicator.adaptive(),
           SizedBox(height: 16.h),
           Text(
-            'Mengambil prakiraan musiman 6 bulan\nuntuk rekomendasi yang lebih akurat…',
+            'Menganalisis data tanah dan cuaca\nuntuk rekomendasi tanaman terbaik…',
             textAlign: TextAlign.center,
             style: AgriTypography.textTheme.bodyMedium?.copyWith(
               color: AgriColors.inkSoft,
@@ -178,6 +173,7 @@ class _ResultPageState extends State<ResultPage> {
     required bool isSaving,
   }) {
     final rec = state.recommendation;
+    final effectiveMoisture = rec.soilMoisturePercent ?? state.scanData.moisture;
     final phCfg = PhMoistureConfigMapper.phConfig(rec.phLabel);
     final mCfg = PhMoistureConfigMapper.moistureConfig(rec.moistureLabel);
 
@@ -189,7 +185,6 @@ class _ResultPageState extends State<ResultPage> {
             padding: EdgeInsets.fromLTRB(20.w, 24.h, 20.w, 0),
             child: Column(
               children: [
-                // Title row
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -226,25 +221,20 @@ class _ResultPageState extends State<ResultPage> {
                   ],
                 ),
                 SizedBox(height: 16.h),
-                // Hero
                 RecommendationHeroCard(recommendation: rec),
                 SizedBox(height: 12.h),
-                // Insight
                 _InsightCard(insight: rec.insight),
                 SizedBox(height: 16.h),
-                // Section divider — Soil
                 _SectionDivider(label: 'Kondisi Tanah'),
                 SizedBox(height: 12.h),
-                // Metrics
                 SoilMetricsRow(
                   ph: state.scanData.ph,
-                  moisture: state.scanData.moisture,
+                  moisture: effectiveMoisture,
                   phLabel: rec.phLabel,
                   moistureLabel: rec.moistureLabel,
                   phCfg: phCfg,
                   mCfg: mCfg,
                 ),
-                // Weather section (only when data was fetched)
                 if (rec.weatherData != null) ...[
                   SizedBox(height: 16.h),
                   _SectionDivider(label: 'Iklim & Cuaca'),

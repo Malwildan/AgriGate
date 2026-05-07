@@ -1,7 +1,3 @@
-// DeviceConnectionCard — BLE status card with 3 visual states:
-//   1. Idle / Error  → "Pilih Perangkat" button that opens BleDevicePickerSheet
-//   2. Connecting    → spinner while establishing connection
-//   3. Connected     → device hero with signal & disconnect button
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -62,8 +58,6 @@ class DeviceConnectionCard extends StatelessWidget {
     );
   }
 }
-
-// ─── Idle card ────────────────────────────────────────────────────────────────
 
 class _IdleCard extends StatelessWidget {
   const _IdleCard({
@@ -148,8 +142,6 @@ class _IdleCard extends StatelessWidget {
   }
 }
 
-// ─── Connecting card ──────────────────────────────────────────────────────────
-
 class _ConnectingCard extends StatelessWidget {
   const _ConnectingCard({super.key, this.device, required this.onCancel});
 
@@ -196,8 +188,6 @@ class _ConnectingCard extends StatelessWidget {
     );
   }
 }
-
-// ─── Connected card ───────────────────────────────────────────────────────────
 
 class _ConnectedCard extends StatelessWidget {
   const _ConnectedCard({super.key, this.device, required this.onDisconnect});
@@ -278,8 +268,6 @@ class _ConnectedCard extends StatelessWidget {
     );
   }
 }
-
-// ─── Shared helpers ───────────────────────────────────────────────────────────
 
 class _ForestCard extends StatelessWidget {
   const _ForestCard({required this.child});

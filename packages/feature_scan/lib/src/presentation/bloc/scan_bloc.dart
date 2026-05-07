@@ -1,19 +1,14 @@
-// Scan BLoC — manages BLE scan, device selection, GPS capture, and sensor reading.
 
 import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:agri_core/agri_core.dart';
 
-// ─── Events ───────────────────────────────────────────────────────────────────
-
 sealed class ScanEvent extends Equatable {
   const ScanEvent();
   @override
   List<Object?> get props => [];
 }
-
-/// Initialize the scan screen, optionally pre-filling fields for a rescan.
 class ScanInitialized extends ScanEvent {
   const ScanInitialized({
     this.prefilledLahanId,
@@ -79,8 +74,6 @@ class ScanDisconnectRequested extends ScanEvent {
 class ScanTakeDataRequested extends ScanEvent {
   const ScanTakeDataRequested();
 }
-
-// ─── States ───────────────────────────────────────────────────────────────────
 
 enum ScanBleStatus { disconnected, scanning, connecting, connected, error }
 
@@ -191,8 +184,6 @@ class ScanState extends Equatable {
         connectedDevice,
       ];
 }
-
-// ─── BLoC ─────────────────────────────────────────────────────────────────────
 
 class ScanBloc extends Bloc<ScanEvent, ScanState> {
   ScanBloc({
@@ -383,7 +374,6 @@ class ScanBloc extends Bloc<ScanEvent, ScanState> {
   }
 
   void _onBleStateChanged(_BleStateChanged event, Emitter<ScanState> emit) {
-    // Only process hardware-driven state changes when not already in scanning mode
     if (state.bleStatus == ScanBleStatus.scanning &&
         event.status == ScanBleStatus.disconnected &&
         state.connectedDevice == null) {
@@ -411,8 +401,6 @@ class ScanBloc extends Bloc<ScanEvent, ScanState> {
     emit(state.copyWith(discoveredDevices: event.devices));
   }
 }
-
-// ─── Internal events ──────────────────────────────────────────────────────────
 
 class _BleStateChanged extends ScanEvent {
   const _BleStateChanged(this.status);

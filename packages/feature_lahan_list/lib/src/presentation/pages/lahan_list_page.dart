@@ -1,4 +1,3 @@
-// Lahan List Page — renders the hero greeting card and the list of lahan.
 
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -59,7 +58,6 @@ class _LahanListPageState extends State<LahanListPage> {
           if (state is LahanListLoaded) _lastLoaded = state;
           return switch (state) {
             LahanListInitial() || LahanListLoading() => _buildSkeleton(),
-            // Keep showing last known content while the refresh spinner runs.
             LahanListRefreshing() when _lastLoaded != null =>
               _buildContent(
                 _lastLoaded!.lahanList,

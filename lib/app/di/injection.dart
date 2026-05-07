@@ -1,4 +1,3 @@
-// Dependency injection — wires all repositories, use cases, services, and BLoCs.
 
 import 'dart:async';
 
@@ -14,7 +13,6 @@ final getIt = GetIt.instance;
 Future<void> configureDependencies({
   required SupabaseConfig supabaseConfig,
 }) async {
-  // ── Repositories (singletons, opened asynchronously) ──────────────────────
   final supabaseClient =
       supabaseConfig.isConfigured ? Supabase.instance.client : null;
   final sessionService = supabaseClient == null
@@ -45,13 +43,16 @@ Future<void> configureDependencies({
     ..registerSingleton<LahanRepository>(lahanRepo)
     ..registerSingleton<ScanRepository>(lahanRepo)
     ..registerSingleton<SyncRepository>(lahanRepo)
-    ..registerSingleton<WeatherRepository>(OpenMeteoWeatherRepository())
-
-    // ── Services ──────────────────────────────────────────────────────────────
+    ..registerSingleton<CropRecommendationRepository>(
+      RailwayCropRepository(
+        baseUrl: const String.fromEnvironment(
+          'RAILWAY_API_URL',
+          defaultValue: 'https://agrigate-model-production.up.railway.app',
+        ),
+      ),
+    )
     ..registerSingleton<BleService>(bleService)
     ..registerSingleton<LocationService>(LocationServiceImpl())
-
-    // ── Use cases ─────────────────────────────────────────────────────────────
     ..registerFactory(() => GetAllLahanUseCase(getIt<LahanRepository>()))
     ..registerFactory(() => SyncLahanDataUseCase(getIt<SyncRepository>()))
     ..registerFactory(() => GetLahanByIdUseCase(getIt<LahanRepository>()))
@@ -61,7 +62,8 @@ Future<void> configureDependencies({
           getIt<ScanRepository>(),
           getIt<LahanRepository>(),
         ))
-    ..registerFactory(() => GetWeatherUseCase(getIt<WeatherRepository>()));
+    ..registerFactory(() =>
+        GetCropRecommendationUseCase(getIt<CropRecommendationRepository>()));
 
   unawaited(bleService.initialize());
 }

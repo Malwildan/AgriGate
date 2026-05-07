@@ -1,6 +1,3 @@
-// WeatherContextCard — 6-month ECMWF SEAS5 seasonal forecast display.
-// Shows a month-by-month strip plus parameter explanation cards with narration
-// to help farmers understand what each number means for their crop choices.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -24,7 +21,6 @@ class WeatherContextCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Header ──────────────────────────────────────────────────────
           Row(
             children: [
               Container(
@@ -46,14 +42,14 @@ class WeatherContextCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Prakiraan Musiman 6 Bulan',
+                      'Prakiraan Cuaca Setempat',
                       style: AgriTypography.textTheme.labelLarge?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: AgriColors.ink,
                       ),
                     ),
                     Text(
-                      'Sumber: ECMWF SEAS5 via Open-Meteo',
+                      'Sumber: Railway AI API',
                       style: AgriTypography.textTheme.bodySmall?.copyWith(
                         color: AgriColors.inkMuted,
                       ),
@@ -63,8 +59,6 @@ class WeatherContextCard extends StatelessWidget {
               ),
             ],
           ),
-
-          // ── Month strip ─────────────────────────────────────────────────
           if (weather.months.isNotEmpty) ...[
             SizedBox(height: 14.h),
             SizedBox(
@@ -80,8 +74,6 @@ class WeatherContextCard extends StatelessWidget {
           ],
 
           SizedBox(height: 14.h),
-
-          // ── Temperature card ─────────────────────────────────────────────
           _ParameterCard(
             icon: Icons.thermostat_rounded,
             label: 'Suhu Udara',
@@ -108,8 +100,21 @@ class WeatherContextCard extends StatelessWidget {
           ),
 
           SizedBox(height: 10.h),
+          if (weather.humidityMean > 0)
+            _ParameterCard(
+              icon: Icons.water_outlined,
+              label: 'Kelembapan Udara',
+              valueWidget: Text(
+                '${weather.humidityMean.toStringAsFixed(1)} %',
+                style: AgriTypography.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AgriColors.ink,
+                ),
+              ),
+              narration: _humidityNarration(weather.humidityMean),
+            ),
 
-          // ── Precipitation card ────────────────────────────────────────────
+          SizedBox(height: 10.h),
           _ParameterCard(
             icon: Icons.water_drop_outlined,
             label: 'Curah Hujan',
@@ -117,14 +122,14 @@ class WeatherContextCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Total 6 bulan: ${weather.precipitationTotal.toStringAsFixed(0)} mm',
+                  'Total 90 hari: ${weather.precipitationTotal.toStringAsFixed(0)} mm',
                   style: AgriTypography.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                     color: AgriColors.ink,
                   ),
                 ),
                 Text(
-                  'Rata-rata: ${(weather.precipitationTotal / 6).toStringAsFixed(0)} mm/bulan',
+                  'Rata-rata: ${(weather.precipitationTotal / 3).toStringAsFixed(0)} mm/bulan',
                   style: AgriTypography.textTheme.bodySmall?.copyWith(
                     color: AgriColors.inkMuted,
                   ),
@@ -135,33 +140,6 @@ class WeatherContextCard extends StatelessWidget {
           ),
 
           SizedBox(height: 10.h),
-
-          // ── ET₀ card ──────────────────────────────────────────────────────
-          _ParameterCard(
-            icon: Icons.opacity_rounded,
-            label: 'Kebutuhan Air (ET₀)',
-            valueWidget: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Rata-rata: ${weather.et0Mean.toStringAsFixed(1)} mm/hari',
-                  style: AgriTypography.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AgriColors.ink,
-                  ),
-                ),
-                Text(
-                  _et0WaterBalance(weather.precipitationTotal, weather.et0Mean),
-                  style: AgriTypography.textTheme.bodySmall?.copyWith(
-                    color: AgriColors.inkMuted,
-                  ),
-                ),
-              ],
-            ),
-            narration: _et0Narration(weather.precipitationTotal, weather.et0Mean),
-          ),
-
-          // ── Climate insight ───────────────────────────────────────────────
           if (climateInsight != null && climateInsight!.isNotEmpty) ...[
             SizedBox(height: 14.h),
             Container(
@@ -198,8 +176,6 @@ class WeatherContextCard extends StatelessWidget {
     );
   }
 
-  // ── Narration helpers ──────────────────────────────────────────────────────
-
   static String _tempNarration(double mean, double max) {
     const base =
         'Suhu optimal untuk tanaman tropis (padi, jagung, singkong) '
@@ -220,6 +196,23 @@ class WeatherContextCard extends StatelessWidget {
     }
     return '${base}Suhu rata-rata ${mean.toStringAsFixed(1)} °C berada '
         'dalam kisaran optimal — kondisi baik untuk pertumbuhan tanaman.';
+  }
+
+  static String _humidityNarration(double humidity) {
+    if (humidity < 40) {
+      return 'Kelembapan udara sangat rendah (${humidity.toStringAsFixed(0)}%). '
+          'Tanaman rentan mengalami stres kekeringan — pastikan irigasi cukup.';
+    }
+    if (humidity < 60) {
+      return 'Kelembapan udara rendah–sedang (${humidity.toStringAsFixed(0)}%). '
+          'Cocok untuk tanaman seperti jagung, kacang tanah, dan singkong.';
+    }
+    if (humidity < 80) {
+      return 'Kelembapan udara sedang–baik (${humidity.toStringAsFixed(0)}%). '
+          'Kondisi optimal untuk sebagian besar tanaman pangan.';
+    }
+    return 'Kelembapan udara tinggi (${humidity.toStringAsFixed(0)}%). '
+        'Perhatikan sirkulasi udara dan risiko penyakit jamur pada tanaman.';
   }
 
   static String _rainNarration(double total6m) {
@@ -243,37 +236,7 @@ class WeatherContextCard extends StatelessWidget {
         'memadai untuk mencegah genangan dan penyakit akar.';
   }
 
-  static String _et0Narration(double total6m, double et0DailyMean) {
-    final rainDaily = total6m / 180; // mm/day average over 6 months
-    const what =
-        'ET₀ (Evapotranspirasi Referensi) adalah estimasi berapa banyak '
-        'air yang diuapkan dari lahan terbuka per hari. '
-        'Jika curah hujan harian lebih kecil dari ET₀, '
-        'tanaman membutuhkan irigasi tambahan.';
-    if (rainDaily < et0DailyMean * 0.7) {
-      return '$what Dengan rata-rata curah hujan ${rainDaily.toStringAsFixed(1)} mm/hari '
-          'dan ET₀ ${et0DailyMean.toStringAsFixed(1)} mm/hari, '
-          'defisit air cukup besar — irigasi rutin sangat diperlukan.';
-    }
-    if (rainDaily < et0DailyMean) {
-      return '$what Curah hujan harian (${rainDaily.toStringAsFixed(1)} mm) '
-          'sedikit di bawah ET₀ (${et0DailyMean.toStringAsFixed(1)} mm/hari) — '
-          'irigasi ringan pada musim kering disarankan.';
-    }
-    return '$what Curah hujan rata-rata (${rainDaily.toStringAsFixed(1)} mm/hari) '
-        'melebihi ET₀ (${et0DailyMean.toStringAsFixed(1)} mm/hari) — '
-        'kebutuhan air umumnya terpenuhi oleh hujan.';
-  }
-
-  static String _et0WaterBalance(double total6m, double et0DailyMean) {
-    final rainDaily = total6m / 180;
-    if (rainDaily >= et0DailyMean) return 'Neraca air: surplus';
-    if (rainDaily >= et0DailyMean * 0.7) return 'Neraca air: defisit ringan';
-    return 'Neraca air: defisit signifikan';
-  }
 }
-
-// ─── Month tile ───────────────────────────────────────────────────────────────
 
 class _MonthTile extends StatelessWidget {
   const _MonthTile({required this.month});
@@ -303,7 +266,6 @@ class _MonthTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            // Show only the month part (e.g. "Mei" from "Mei 2026")
             month.monthLabel.split(' ').first,
             style: AgriTypography.textTheme.bodySmall?.copyWith(
               fontWeight: FontWeight.w600,
@@ -324,15 +286,15 @@ class _MonthTile extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
-                Icons.water_drop_rounded,
+                Icons.opacity_rounded,
                 size: 10,
-                color: isWet ? const Color(0xFF1565C0) : AgriColors.inkMuted,
+                color: AgriColors.inkMuted,
               ),
               SizedBox(width: 2.w),
               Text(
-                '${month.precipitationSum.toStringAsFixed(0)}',
+                '${month.humidityMean.toStringAsFixed(0)}%',
                 style: AgriTypography.textTheme.bodySmall?.copyWith(
-                  color: isWet ? const Color(0xFF1565C0) : AgriColors.inkMuted,
+                  color: AgriColors.inkMuted,
                   fontSize: 11,
                 ),
               ),
@@ -343,8 +305,6 @@ class _MonthTile extends StatelessWidget {
     );
   }
 }
-
-// ─── Parameter explanation card ───────────────────────────────────────────────
 
 class _ParameterCard extends StatelessWidget {
   const _ParameterCard({
@@ -371,7 +331,6 @@ class _ParameterCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Label row
           Row(
             children: [
               Icon(icon, size: 15, color: AgriColors.inkSoft),
@@ -386,13 +345,10 @@ class _ParameterCard extends StatelessWidget {
             ],
           ),
           SizedBox(height: 6.h),
-          // Value
           valueWidget,
           SizedBox(height: 8.h),
-          // Divider
           Container(height: 1, color: AgriColors.borderStrong),
           SizedBox(height: 8.h),
-          // Narration
           Text(
             narration,
             style: AgriTypography.textTheme.bodySmall?.copyWith(

@@ -75,6 +75,7 @@ void main() {
       build: () => LahanListBloc(getAllLahanUseCase, syncLahanDataUseCase),
       act: (bloc) => bloc.add(const LahanListRefreshRequested()),
       expect: () => [
+        isA<LahanListRefreshing>(),
         isA<LahanListLoaded>().having(
           (state) => state.lahanList,
           'lahanList',

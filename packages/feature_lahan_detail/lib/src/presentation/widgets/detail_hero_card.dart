@@ -1,4 +1,3 @@
-// DetailHeroCard — crop image hero with lahan owner, area, location, and latest rec.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -23,8 +22,9 @@ String _formatRecordedAt(DateTime value) {
     '', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
     'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des',
   ];
-  final day = value.day.toString().padLeft(2, '0');
-  return '$day ${months[value.month]} ${value.year}';
+  final local = value.toLocal();
+  final day = local.day.toString().padLeft(2, '0');
+  return '$day ${months[local.month]} ${local.year}';
 }
 
 class DetailHeroCard extends StatelessWidget {

@@ -1,4 +1,3 @@
-// App widget — MaterialApp.router with AgriTheme and ScreenUtilInit.
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

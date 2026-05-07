@@ -1,4 +1,3 @@
-// Hive-backed data models with type adapters.
 
 import 'package:hive/hive.dart';
 import '../../domain/entities/entities.dart';

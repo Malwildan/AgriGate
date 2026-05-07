@@ -1,4 +1,3 @@
-// Failure types — sealed class hierarchy for typed error handling.
 
 import 'package:equatable/equatable.dart';
 
@@ -50,6 +49,6 @@ class UnexpectedFailure extends Failure {
   const UnexpectedFailure([super.message = 'Terjadi kesalahan tak terduga.']);
 }
 
-class WeatherFailure extends Failure {
-  const WeatherFailure([super.message = 'Gagal mengambil data cuaca.']);
+class RecommendationFailure extends Failure {
+  const RecommendationFailure([super.message = 'Gagal mengambil rekomendasi tanaman.']);
 }

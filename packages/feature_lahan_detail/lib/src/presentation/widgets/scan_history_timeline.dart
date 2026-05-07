@@ -1,4 +1,3 @@
-// ScanHistoryTimeline — dated scan records with pH/moisture chips.
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
@@ -32,8 +31,9 @@ class ScanHistoryTimeline extends StatelessWidget {
       'Nov',
       'Des',
     ];
-    final day = value.day.toString().padLeft(2, '0');
-    return '$day ${months[value.month]} ${value.year}';
+    final local = value.toLocal();
+    final day = local.day.toString().padLeft(2, '0');
+    return '$day ${months[local.month]} ${local.year}';
   }
 
   @override
@@ -94,9 +94,12 @@ class _TimelineItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rec = GetRecommendationUseCase.compute(
-      ph: record.ph,
-      moisture: record.moisture,
+    final rec = CropRecommendation(
+      main: record.recommendation,
+      alternatives: const [],
+      insight: '',
+      phLabel: phLabelFor(record.ph),
+      moistureLabel: moistureLabelFor(record.moisture),
     );
     final cardChild = AgriCard(
       padding: EdgeInsets.all(14.w),

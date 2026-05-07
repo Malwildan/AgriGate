@@ -1,10 +1,7 @@
-// Result BLoC — presents recommendation data and handles the save-result flow.
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:agri_core/agri_core.dart';
-
-// ─── Events ───────────────────────────────────────────────────────────────────
 
 sealed class ResultEvent extends Equatable {
   const ResultEvent();
@@ -25,8 +22,6 @@ class ResultInitialized extends ResultEvent {
   final int lahanId;
   final String ownerName;
   final String lahanArea;
-
-  /// Optional "lat, lon" string used to fetch weather data.
   final String location;
 
   @override
@@ -40,8 +35,6 @@ class ResultSaveRequested extends ResultEvent {
 class ResultScanAgainRequested extends ResultEvent {
   const ResultScanAgainRequested();
 }
-
-// ─── States ───────────────────────────────────────────────────────────────────
 
 sealed class ResultState extends Equatable {
   const ResultState();
@@ -102,17 +95,15 @@ class ResultError extends ResultState {
   List<Object?> get props => [message];
 }
 
-// ─── BLoC ─────────────────────────────────────────────────────────────────────
-
 class ResultBloc extends Bloc<ResultEvent, ResultState> {
-  ResultBloc(this._saveScanResult, this._getWeather, this._syncLahanData)
+  ResultBloc(this._saveScanResult, this._getCropRecommendation, this._syncLahanData)
       : super(const ResultInitial()) {
     on<ResultInitialized>(_onInitialized);
     on<ResultSaveRequested>(_onSaveRequested);
   }
 
   final SaveScanResultUseCase _saveScanResult;
-  final GetWeatherUseCase _getWeather;
+  final GetCropRecommendationUseCase _getCropRecommendation;
   final SyncLahanDataUseCase _syncLahanData;
 
   Future<void> _onInitialized(
@@ -121,25 +112,24 @@ class ResultBloc extends Bloc<ResultEvent, ResultState> {
   ) async {
     emit(const ResultLoadingWeather());
 
-    // Attempt to fetch weather using the location string ("lat, lon").
-    WeatherData? weatherData;
     final coords = _parseLatLon(event.location);
-    if (coords != null) {
-      final weatherResult = await _getWeather(
-        GetWeatherParams(latitude: coords.$1, longitude: coords.$2),
-      );
-      weatherResult.fold((_) => null, (w) => weatherData = w);
-    }
-
-    final rec = GetRecommendationUseCase.compute(
-      ph: event.scanData.ph,
-      moisture: event.scanData.moisture,
-      weather: weatherData,
+    final result = await _getCropRecommendation(
+      GetCropRecommendationParams(
+        ph: event.scanData.ph,
+        moisture: event.scanData.moisture,
+        latitude: coords?.$1,
+        longitude: coords?.$2,
+      ),
     );
+
+    if (result.isLeft) {
+      emit(ResultError(result.left.message));
+      return;
+    }
 
     emit(ResultReady(
       scanData: event.scanData,
-      recommendation: rec,
+      recommendation: result.right,
       lahanId: event.lahanId,
       ownerName: event.ownerName,
       lahanArea: event.lahanArea,
@@ -157,10 +147,14 @@ class ResultBloc extends Bloc<ResultEvent, ResultState> {
 
     emit(ResultSaving(ready));
 
+    final effectiveMoisture =
+        ready.recommendation.soilMoisturePercent ?? ready.scanData.moisture;
+
     final result = await _saveScanResult(SaveScanResultParams(
       lahanId: ready.lahanId,
       ph: ready.scanData.ph,
-      moisture: ready.scanData.moisture,
+      moisture: effectiveMoisture,
+      recommendation: ready.recommendation.main,
       owner: ready.ownerName,
       area: ready.lahanArea,
       location: ready.location,
@@ -174,9 +168,6 @@ class ResultBloc extends Bloc<ResultEvent, ResultState> {
     await _syncLahanData(const NoParams());
     emit(ResultSaved(result.right.id));
   }
-
-  /// Parses "lat, lon" strings produced by the GPS capture service.
-  /// Returns null if the string cannot be parsed.
   static (double, double)? _parseLatLon(String location) {
     if (location.isEmpty) return null;
     final parts = location.split(',');

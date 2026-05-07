@@ -1,4 +1,3 @@
-/// feature_result public API.
 library feature_result;
 
 export 'src/presentation/bloc/result_bloc.dart';

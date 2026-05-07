@@ -1,31 +1,19 @@
-// AgriGate color tokens — mapped directly from the React app's design constants.
 
 import 'package:flutter/material.dart';
 
 abstract final class AgriColors {
-  // ── Backgrounds ──────────────────────────────────────────────────────────
   static const Color background = Color(0xFFEBE9E0);
   static const Color backgroundAlt = Color(0xFFDCD9CC);
   static const Color card = Color(0xFFFFFFFF);
-
-  // ── Forest (dark panels / hero) ──────────────────────────────────────────
   static const Color forest = Color(0xFF1E2823);
   static const Color forestDeep = Color(0xFF141A16);
-
-  // ── Lime (CTAs / highlights) ─────────────────────────────────────────────
   static const Color lime = Color(0xFFC8F04D);
   static const Color limeDark = Color(0xFFA9D12D);
-
-  // ── Ink (text) ───────────────────────────────────────────────────────────
   static const Color ink = Color(0xFF1C2620);
   static const Color inkSoft = Color(0xFF4A5450);
   static const Color inkMuted = Color(0xFF6B736E);
-
-  // ── Borders ──────────────────────────────────────────────────────────────
-  static const Color border = Color(0x141C2620);         // rgba(28,38,32, 0.08)
-  static const Color borderStrong = Color(0x281C2620);   // rgba(28,38,32, 0.16)
-
-  // ── Status colors ────────────────────────────────────────────────────────
+  static const Color border = Color(0x141C2620);
+  static const Color borderStrong = Color(0x281C2620);
   static const Color statusAktifBg = lime;
   static const Color statusAktifText = ink;
 
@@ -34,8 +22,6 @@ abstract final class AgriColors {
 
   static const Color statusTidakAktifBg = Color(0xFFDCD9CC);
   static const Color statusTidakAktifText = Color(0xFF3A3830);
-
-  // ── pH label colors ──────────────────────────────────────────────────────
   static const Color phSangatAsamBg = Color(0xFFFDE7E7);
   static const Color phSangatAsamText = Color(0xFF7A1818);
 
@@ -50,8 +36,6 @@ abstract final class AgriColors {
 
   static const Color phBasaBg = Color(0xFFE3DCFA);
   static const Color phBasaText = Color(0xFF3A1D72);
-
-  // ── Moisture label colors ────────────────────────────────────────────────
   static const Color moistureRendahBg = Color(0xFFFCEFD6);
   static const Color moistureRendahText = Color(0xFF7A4A0A);
 
@@ -63,8 +47,6 @@ abstract final class AgriColors {
 
   static const Color moistureTinggiBg = Color(0xFFD6ECF2);
   static const Color moistureTinggiText = Color(0xFF0E4F5E);
-
-  // ── Semantic ─────────────────────────────────────────────────────────────
   static const Color error = Color(0xFFD4183D);
   static const Color onError = Colors.white;
   static const Color surface = card;

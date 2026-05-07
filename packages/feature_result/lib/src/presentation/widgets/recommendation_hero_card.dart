@@ -1,12 +1,9 @@
-// RecommendationHeroCard — dark forest card with crop image and crop name.
 
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:agri_core/agri_core.dart';
 import 'package:agri_design_system/agri_design_system.dart';
-
-// Reuse image map from lahan_list via a simple local copy (keeps packages independent).
 const _cropImages = {
   'Jagung':
       'https://images.unsplash.com/photo-1649251037465-72c9d378acb6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080',

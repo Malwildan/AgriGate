@@ -1,4 +1,3 @@
-// Lahan Detail Page — hero card, quick metrics, scan history, rescan CTA.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -67,9 +66,12 @@ class _LahanDetailPageState extends State<LahanDetailPage> {
   ) {
     final latest = lahan.latestScan;
     final rec = latest != null
-        ? GetRecommendationUseCase.compute(
-            ph: latest.ph,
-            moisture: latest.moisture,
+        ? CropRecommendation(
+            main: latest.recommendation,
+            alternatives: const [],
+            insight: '',
+            phLabel: phLabelFor(latest.ph),
+            moistureLabel: moistureLabelFor(latest.moisture),
           )
         : null;
 

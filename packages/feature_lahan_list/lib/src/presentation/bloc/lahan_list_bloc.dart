@@ -1,10 +1,7 @@
-// Lahan List BLoC — events, states, and bloc.
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:agri_core/agri_core.dart';
-
-// ─── Events ───────────────────────────────────────────────────────────────────
 
 sealed class LahanListEvent extends Equatable {
   const LahanListEvent();
@@ -19,8 +16,6 @@ class LahanListLoadRequested extends LahanListEvent {
 class LahanListRefreshRequested extends LahanListEvent {
   const LahanListRefreshRequested();
 }
-
-// ─── States ───────────────────────────────────────────────────────────────────
 
 sealed class LahanListState extends Equatable {
   const LahanListState();
@@ -40,9 +35,6 @@ class LahanListLoaded extends LahanListState {
   const LahanListLoaded(this.lahanList, {this.syncError});
 
   final List<Lahan> lahanList;
-
-  /// Non-null when the last sync attempt failed. The list is still shown
-  /// using local data; the UI should surface this as a dismissible banner.
   final String? syncError;
 
   int get totalScans =>
@@ -66,8 +58,6 @@ class LahanListError extends LahanListState {
   @override
   List<Object?> get props => [message];
 }
-
-// ─── BLoC ─────────────────────────────────────────────────────────────────────
 
 class LahanListBloc extends Bloc<LahanListEvent, LahanListState> {
   LahanListBloc(this._getAllLahan, this._syncLahanData)

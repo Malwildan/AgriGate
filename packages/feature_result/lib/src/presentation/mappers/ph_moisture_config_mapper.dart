@@ -1,4 +1,3 @@
-// Maps pH/moisture label strings to color configs used in metric cards.
 
 import 'package:flutter/material.dart';
 import 'package:agri_design_system/agri_design_system.dart';

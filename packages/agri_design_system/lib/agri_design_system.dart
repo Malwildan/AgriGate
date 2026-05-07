@@ -1,4 +1,3 @@
-/// agri_design_system — Public API barrel.
 library agri_design_system;
 
 export 'src/tokens/agri_colors.dart';

@@ -1,19 +1,10 @@
-// BLE service implementation using flutter_blue_plus.
-// Scans for BLE devices (AgriGate_BLE ESP32), connects by device ID,
-// and subscribes to pH notifications.
 
 import 'dart:async';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:agri_core/agri_core.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-/// Custom service UUID for sensor data (replace with actual ESP32 UUID).
 const _kServiceUuid = '12345678-1234-1234-1234-1234567890ab';
-
-/// Characteristic UUID for the pH notify characteristic.
 const _kSensorCharUuid = 'abcd1234-5678-1234-5678-abcdef123456';
-
-/// Scan duration for each scan session.
 const _kScanDuration = Duration(seconds: 10);
 
 const _kLastDeviceIdKey = 'ble.last_device_id';
@@ -41,8 +32,6 @@ class BleServiceImpl implements BleService {
     _currentConnectionState = state;
     _connectionStateController.add(state);
   }
-
-  // ── Public streams ─────────────────────────────────────────────────────────
 
   @override
   Stream<BleConnectionState> get connectionState =>
@@ -157,8 +146,6 @@ class BleServiceImpl implements BleService {
     return message.contains('already') && message.contains('connected');
   }
 
-  // ── Scanning ───────────────────────────────────────────────────────────────
-
   @override
   Future<void> startScan() async {
     _foundDevices.clear();
@@ -189,8 +176,6 @@ class BleServiceImpl implements BleService {
     await _scanSub?.cancel();
     _scanSub = null;
   }
-
-  // ── Connection ─────────────────────────────────────────────────────────────
 
   @override
   Future<Either<BleFailure, void>> connectToDevice(String deviceId) async {
@@ -250,8 +235,6 @@ class BleServiceImpl implements BleService {
     _emitConnection(BleConnectionState.disconnected);
   }
 
-  // ── Sensor reading ─────────────────────────────────────────────────────────
-
   @override
   Future<Either<BleFailure, ScanData>> readSensorData() async {
     if (_device == null) {
@@ -274,8 +257,6 @@ class BleServiceImpl implements BleService {
       await characteristic.setNotifyValue(true);
       final bytes = await characteristic.onValueReceived.first;
       final payload = String.fromCharCodes(bytes);
-
-      // Protocol: "PH:6.78" — UTF-8 string sent every 2 s via NOTIFY.
       if (!payload.startsWith('PH:')) {
         throw BleException('Format data tidak valid: $payload');
       }

@@ -6,7 +6,8 @@ import 'package:mocktail/mocktail.dart';
 
 class _MockSaveScanResultUseCase extends Mock implements SaveScanResultUseCase {}
 
-class _MockGetWeatherUseCase extends Mock implements GetWeatherUseCase {}
+class _MockGetCropRecommendationUseCase extends Mock
+    implements GetCropRecommendationUseCase {}
 
 class _MockSyncLahanDataUseCase extends Mock implements SyncLahanDataUseCase {}
 
@@ -16,21 +17,22 @@ void main() {
       lahanId: 0,
       ph: 0,
       moisture: 0,
+      recommendation: '',
     ));
-    registerFallbackValue(const GetWeatherParams(latitude: 0, longitude: 0));
+    registerFallbackValue(const GetCropRecommendationParams(ph: 0, moisture: 0));
     registerFallbackValue(const NoParams());
   });
 
   group('ResultBloc', () {
     late _MockSaveScanResultUseCase saveScanResultUseCase;
-    late _MockGetWeatherUseCase getWeatherUseCase;
+    late _MockGetCropRecommendationUseCase getCropRecommendationUseCase;
     late _MockSyncLahanDataUseCase syncLahanDataUseCase;
     late SaveScanResultParams capturedParams;
     late List<String> calls;
 
     setUp(() {
       saveScanResultUseCase = _MockSaveScanResultUseCase();
-      getWeatherUseCase = _MockGetWeatherUseCase();
+      getCropRecommendationUseCase = _MockGetCropRecommendationUseCase();
       syncLahanDataUseCase = _MockSyncLahanDataUseCase();
       calls = [];
     });
@@ -38,8 +40,14 @@ void main() {
     blocTest<ResultBloc, ResultState>(
       'passes owner, area, and location then syncs after saving a brand-new lahan result',
       setUp: () {
-        when(() => getWeatherUseCase(any())).thenAnswer(
-          (_) async => const Left(WeatherFailure('weather unavailable')),
+        when(() => getCropRecommendationUseCase(any())).thenAnswer(
+          (_) async => const Right(CropRecommendation(
+            main: 'Jagung',
+            alternatives: [],
+            insight: 'Tanah cocok untuk jagung.',
+            phLabel: 'Netral',
+            moistureLabel: 'Sedang',
+          )),
         );
         when(() => saveScanResultUseCase(any())).thenAnswer((invocation) async {
           calls.add('save');
@@ -62,7 +70,7 @@ void main() {
       },
       build: () => ResultBloc(
         saveScanResultUseCase,
-        getWeatherUseCase,
+        getCropRecommendationUseCase,
         syncLahanDataUseCase,
       ),
       act: (bloc) async {
@@ -87,6 +95,7 @@ void main() {
         expect(capturedParams.owner, 'Pak Budi');
         expect(capturedParams.area, 'Lahan A');
         expect(capturedParams.location, '-7.54, 110.21');
+        expect(capturedParams.recommendation, 'Jagung');
         expect(calls, ['save', 'sync']);
       },
     );
@@ -94,13 +103,22 @@ void main() {
     blocTest<ResultBloc, ResultState>(
       'emits an error when saving scan history fails',
       setUp: () {
+        when(() => getCropRecommendationUseCase(any())).thenAnswer(
+          (_) async => const Right(CropRecommendation(
+            main: 'Singkong',
+            alternatives: [],
+            insight: 'Tanah cocok untuk singkong.',
+            phLabel: 'Asam',
+            moistureLabel: 'Rendah',
+          )),
+        );
         when(() => saveScanResultUseCase(any())).thenAnswer(
           (_) async => const Left(CacheFailure('Gagal menyimpan scan.')),
         );
       },
       build: () => ResultBloc(
         saveScanResultUseCase,
-        getWeatherUseCase,
+        getCropRecommendationUseCase,
         syncLahanDataUseCase,
       ),
       act: (bloc) async {
@@ -118,6 +136,31 @@ void main() {
         isA<ResultReady>(),
         isA<ResultSaving>(),
         const ResultError('Gagal menyimpan scan.'),
+      ],
+    );
+
+    blocTest<ResultBloc, ResultState>(
+      'emits ResultError when the Railway API fails',
+      setUp: () {
+        when(() => getCropRecommendationUseCase(any())).thenAnswer(
+          (_) async => const Left(
+              RecommendationFailure('Tidak dapat terhubung ke server rekomendasi.')),
+        );
+      },
+      build: () => ResultBloc(
+        saveScanResultUseCase,
+        getCropRecommendationUseCase,
+        syncLahanDataUseCase,
+      ),
+      act: (bloc) => bloc.add(const ResultInitialized(
+        scanData: ScanData(ph: 6.5, moisture: 55),
+        lahanId: 1,
+        ownerName: 'Pak Andi',
+        lahanArea: 'Lahan C',
+      )),
+      expect: () => [
+        const ResultLoadingWeather(),
+        const ResultError('Tidak dapat terhubung ke server rekomendasi.'),
       ],
     );
   });

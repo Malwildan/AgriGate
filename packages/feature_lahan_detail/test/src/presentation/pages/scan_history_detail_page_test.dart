@@ -73,7 +73,7 @@ void main() {
 
     expect(find.text('Detail Riwayat'), findsOneWidget);
     expect(find.text('06 Mei 2026'), findsOneWidget);
-    expect(find.text('Cabai'), findsOneWidget);
+    expect(find.text('Cabai'), findsNWidgets(2));
     expect(find.text('62%'), findsOneWidget);
     expect(find.text('2'), findsOneWidget);
     verify(() => getLahanById(7)).called(1);

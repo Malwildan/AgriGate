@@ -1,10 +1,7 @@
-// Detail BLoC — loads lahan detail and handles status changes.
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:agri_core/agri_core.dart';
-
-// ─── Events ───────────────────────────────────────────────────────────────────
 
 sealed class DetailEvent extends Equatable {
   const DetailEvent();
@@ -30,8 +27,6 @@ class DetailStatusChanged extends DetailEvent {
   @override
   List<Object?> get props => [lahanId, status];
 }
-
-// ─── States ───────────────────────────────────────────────────────────────────
 
 sealed class DetailState extends Equatable {
   const DetailState();
@@ -68,8 +63,6 @@ class DetailError extends DetailState {
   @override
   List<Object?> get props => [message];
 }
-
-// ─── BLoC ─────────────────────────────────────────────────────────────────────
 
 class DetailBloc extends Bloc<DetailEvent, DetailState> {
   DetailBloc({

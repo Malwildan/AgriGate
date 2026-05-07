@@ -1,8 +1,5 @@
-// Domain Entities — plain Dart objects, no Flutter or framework imports.
 
 import 'package:equatable/equatable.dart';
-
-// ─── Lahan Status ─────────────────────────────────────────────────────────────
 
 enum LahanStatus {
   aktif('Aktif'),
@@ -20,11 +17,22 @@ enum LahanStatus {
   }
 }
 
-// ─── Crop Icon Kind ───────────────────────────────────────────────────────────
-
 enum CropIconKind { grain, leaf, flower }
 
-// ─── Crop Alternative ─────────────────────────────────────────────────────────
+String phLabelFor(double ph) {
+  if (ph < 5.5) return 'Sangat Asam';
+  if (ph < 6.0) return 'Asam';
+  if (ph < 7.0) return 'Netral';
+  if (ph < 7.5) return 'Basa Ringan';
+  return 'Basa';
+}
+
+String moistureLabelFor(int moisture) {
+  if (moisture < 40) return 'Rendah';
+  if (moisture < 60) return 'Sedang';
+  if (moisture < 75) return 'Cukup';
+  return 'Tinggi';
+}
 
 class CropAlternative extends Equatable {
   const CropAlternative({required this.name, required this.icon});
@@ -36,44 +44,28 @@ class CropAlternative extends Equatable {
   List<Object?> get props => [name, icon];
 }
 
-// ─── Seasonal Month Data ─────────────────────────────────────────────────────
-// Per-month summary from the Open-Meteo ECMWF SEAS5 seasonal forecast.
-
 class SeasonalMonthData extends Equatable {
   const SeasonalMonthData({
     required this.monthLabel,
     required this.tempMean,
     required this.tempMax,
     required this.tempMin,
+    required this.humidityMean,
     required this.precipitationSum,
     required this.et0Sum,
   });
-
-  /// Human-readable month label, e.g. "Mei 2026".
   final String monthLabel;
-
-  /// Mean temperature (°C) for the month.
   final double tempMean;
-
-  /// Maximum temperature (°C) for the month.
   final double tempMax;
-
-  /// Minimum temperature (°C) for the month.
   final double tempMin;
-
-  /// Total precipitation (mm) for the month.
+  final double humidityMean;
   final double precipitationSum;
-
-  /// Total ET₀ reference evapotranspiration (mm) for the month.
   final double et0Sum;
 
   @override
   List<Object?> get props =>
-      [monthLabel, tempMean, tempMax, tempMin, precipitationSum, et0Sum];
+      [monthLabel, tempMean, tempMax, tempMin, humidityMean, precipitationSum, et0Sum];
 }
-
-// ─── Weather Data ─────────────────────────────────────────────────────────────
-// 6-month seasonal forecast from Open-Meteo ECMWF SEAS5.
 
 class WeatherData extends Equatable {
   const WeatherData({
@@ -83,32 +75,20 @@ class WeatherData extends Equatable {
     required this.precipitationTotal,
     required this.et0Mean,
     required this.months,
+    this.humidityMean = 0.0,
   });
-
-  /// 6-month average of monthly mean temperatures (°C).
   final double tempMean;
-
-  /// Maximum of monthly max temperatures (°C) across 6 months.
   final double tempMax;
-
-  /// Minimum of monthly min temperatures (°C) across 6 months.
   final double tempMin;
-
-  /// Total accumulated precipitation (mm) over 6 months.
   final double precipitationTotal;
-
-  /// Average daily ET₀ reference evapotranspiration (mm/day) over 6 months.
   final double et0Mean;
-
-  /// Per-month breakdown for UI display (up to 6 entries).
   final List<SeasonalMonthData> months;
+  final double humidityMean;
 
   @override
   List<Object?> get props =>
-      [tempMean, tempMax, tempMin, precipitationTotal, et0Mean, months];
+      [tempMean, tempMax, tempMin, precipitationTotal, et0Mean, months, humidityMean];
 }
-
-// ─── Crop Recommendation ──────────────────────────────────────────────────────
 
 class CropRecommendation extends Equatable {
   const CropRecommendation({
@@ -117,6 +97,7 @@ class CropRecommendation extends Equatable {
     required this.insight,
     required this.phLabel,
     required this.moistureLabel,
+    this.soilMoisturePercent,
     this.weatherData,
     this.climateInsight,
   });
@@ -126,19 +107,23 @@ class CropRecommendation extends Equatable {
   final String insight;
   final String phLabel;
   final String moistureLabel;
-
-  /// Optional weather context used to enrich the recommendation.
+  final int? soilMoisturePercent;
   final WeatherData? weatherData;
-
-  /// Optional climate-based insight summarising weather impact on the crop choice.
   final String? climateInsight;
 
   @override
   List<Object?> get props =>
-      [main, alternatives, insight, phLabel, moistureLabel, weatherData, climateInsight];
+      [
+        main,
+        alternatives,
+        insight,
+        phLabel,
+        moistureLabel,
+        soilMoisturePercent,
+        weatherData,
+        climateInsight,
+      ];
 }
-
-// ─── Scan Record ──────────────────────────────────────────────────────────────
 
 class ScanRecord extends Equatable {
   const ScanRecord({
@@ -159,8 +144,6 @@ class ScanRecord extends Equatable {
   List<Object?> get props => [id, recordedAt, ph, moisture, recommendation];
 }
 
-// ─── Scan Data ────────────────────────────────────────────────────────────────
-
 class ScanData extends Equatable {
   const ScanData({required this.ph, required this.moisture});
 
@@ -170,8 +153,6 @@ class ScanData extends Equatable {
   @override
   List<Object?> get props => [ph, moisture];
 }
-
-// ─── BLE Device ───────────────────────────────────────────────────────────────
 
 class BleDevice extends Equatable {
   const BleDevice({
@@ -192,8 +173,6 @@ class BleDevice extends Equatable {
   @override
   List<Object?> get props => [id, name, rssi];
 }
-
-// ─── Lahan ────────────────────────────────────────────────────────────────────
 
 class Lahan extends Equatable {
   const Lahan({

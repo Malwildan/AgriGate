@@ -64,9 +64,12 @@ class _ScanHistoryDetailPageState extends State<ScanHistoryDetailPage> {
     }
 
     final record = orderedHistory[recordIndex];
-    final recommendation = GetRecommendationUseCase.compute(
-      ph: record.ph,
-      moisture: record.moisture,
+    final recommendation = CropRecommendation(
+      main: record.recommendation,
+      alternatives: const [],
+      insight: '',
+      phLabel: phLabelFor(record.ph),
+      moistureLabel: moistureLabelFor(record.moisture),
     );
     final headerSubtitle = [lahan.owner, lahan.area]
         .where((value) => value.trim().isNotEmpty)
@@ -128,14 +131,16 @@ class _ScanHistoryDetailPageState extends State<ScanHistoryDetailPage> {
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      SizedBox(height: 10.h),
-                      Text(
-                        recommendation.insight,
-                        style: AgriTypography.textTheme.bodyMedium!.copyWith(
-                          color: AgriColors.inkSoft,
-                          height: 1.45,
+                      if (recommendation.insight.isNotEmpty) ...[
+                        SizedBox(height: 10.h),
+                        Text(
+                          recommendation.insight,
+                          style: AgriTypography.textTheme.bodyMedium!.copyWith(
+                            color: AgriColors.inkSoft,
+                            height: 1.45,
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 ),

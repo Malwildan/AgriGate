@@ -1,4 +1,3 @@
-// ScanFormCard — owner, area, and GPS location inputs.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -253,13 +252,11 @@ class _GpsIconButton extends StatelessWidget {
   const _GpsIconButton({
     required this.child,
     required this.bgColor,
-    this.borderColor,
     this.onTap,
   });
 
   final Widget child;
   final Color bgColor;
-  final Color? borderColor;
   final VoidCallback? onTap;
 
   @override
@@ -272,9 +269,6 @@ class _GpsIconButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(14),
-          border: borderColor != null
-              ? Border.all(color: borderColor!, width: 1.5)
-              : null,
         ),
         child: Center(child: child),
       ),

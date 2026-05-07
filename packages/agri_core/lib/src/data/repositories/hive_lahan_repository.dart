@@ -1,4 +1,3 @@
-// Hive-backed Lahan repository implementation.
 
 import 'package:hive/hive.dart';
 import '../../domain/entities/entities.dart';
@@ -23,8 +22,6 @@ class HiveLahanRepository implements LahanRepository {
       Hive.registerAdapter(LahanModelAdapter());
     }
     final box = await Hive.openBox<LahanModel>(_lahanBoxName);
-
-    // Seed initial data if empty
     if (box.isEmpty && enableDemoSeed) {
       await _seedInitialData(box);
     }
@@ -216,8 +213,6 @@ class HiveLahanRepository implements LahanRepository {
     }
   }
 }
-
-// ─── Hive Scan Repository ─────────────────────────────────────────────────────
 
 class HiveScanRepository implements ScanRepository {
   HiveScanRepository(this._lahanRepository);

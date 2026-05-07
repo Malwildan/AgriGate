@@ -1,4 +1,3 @@
-// Hero greeting card widget for the lahan list screen.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

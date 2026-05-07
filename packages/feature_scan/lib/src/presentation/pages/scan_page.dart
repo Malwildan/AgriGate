@@ -1,4 +1,3 @@
-// Scan Page — form inputs, BLE device card, GPS capture, sticky scan CTA.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

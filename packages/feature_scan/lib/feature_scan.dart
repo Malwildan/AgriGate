@@ -1,4 +1,3 @@
-/// feature_scan public API.
 library feature_scan;
 
 export 'src/presentation/bloc/scan_bloc.dart';

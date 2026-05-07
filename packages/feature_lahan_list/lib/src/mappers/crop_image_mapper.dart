@@ -1,4 +1,3 @@
-// Shared crop image URL mapper — Unsplash images matching crop names from the React app.
 
 abstract final class CropImageMapper {
   static const Map<String, String> _images = {

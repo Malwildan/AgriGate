@@ -1,4 +1,3 @@
-// Typography tokens matching Montserrat (display/headings) and Source Sans Pro (body).
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -6,7 +5,6 @@ import 'agri_colors.dart';
 
 abstract final class AgriTypography {
   static TextTheme get textTheme => TextTheme(
-        // Display / hero headings — Montserrat
         displayLarge: _montserrat(
           fontSize: 48,
           fontWeight: FontWeight.w700,
@@ -28,8 +26,6 @@ abstract final class AgriTypography {
           color: AgriColors.ink,
           height: 1.1,
         ),
-
-        // Page titles — Montserrat
         headlineLarge: _montserrat(
           fontSize: 28,
           fontWeight: FontWeight.w700,
@@ -51,8 +47,6 @@ abstract final class AgriTypography {
           color: AgriColors.ink,
           height: 1.25,
         ),
-
-        // Section labels / card titles — Source Sans Pro
         titleLarge: _sourceSans(
           fontSize: 17,
           fontWeight: FontWeight.w700,
@@ -71,8 +65,6 @@ abstract final class AgriTypography {
           letterSpacing: 0.2,
           color: AgriColors.inkSoft,
         ),
-
-        // Body — Source Sans Pro
         bodyLarge: _sourceSans(
           fontSize: 16,
           fontWeight: FontWeight.w400,
@@ -91,8 +83,6 @@ abstract final class AgriTypography {
           color: AgriColors.inkSoft,
           height: 1.4,
         ),
-
-        // Labels / captions — Source Sans Pro
         labelLarge: _sourceSans(
           fontSize: 15,
           fontWeight: FontWeight.w700,
@@ -142,8 +132,6 @@ abstract final class AgriTypography {
         color: color,
         height: height,
       );
-
-  // Convenience getters for direct use
   static TextStyle get sectionLabel => _sourceSans(
         fontSize: 12,
         fontWeight: FontWeight.w700,

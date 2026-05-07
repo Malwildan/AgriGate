@@ -1,4 +1,3 @@
-/// feature_lahan_detail public API.
 library feature_lahan_detail;
 
 export 'src/presentation/bloc/detail_bloc.dart';

@@ -1,4 +1,3 @@
-// LahanCard widget — compact list item showing lahan summary.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -20,9 +19,12 @@ class LahanCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final latest = lahan.latestScan;
     final rec = latest != null
-        ? GetRecommendationUseCase.compute(
-            ph: latest.ph,
-            moisture: latest.moisture,
+        ? CropRecommendation(
+            main: latest.recommendation,
+            alternatives: const [],
+            insight: '',
+            phLabel: phLabelFor(latest.ph),
+            moistureLabel: moistureLabelFor(latest.moisture),
           )
         : null;
     final cropImg = rec != null ? CropImageMapper.urlFor(rec.main) : null;

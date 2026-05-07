@@ -1,11 +1,8 @@
-// Shared UI components for AgriGate — reusable primitives that all features use.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../tokens/agri_colors.dart';
 import '../tokens/agri_typography.dart';
-
-// ─── AgriAppBar ───────────────────────────────────────────────────────────────
 
 class AgriAppBar extends StatelessWidget implements PreferredSizeWidget {
   const AgriAppBar({
@@ -171,8 +168,6 @@ class _LiveBadge extends StatelessWidget {
   }
 }
 
-// ─── SectionLabel ─────────────────────────────────────────────────────────────
-
 class SectionLabel extends StatelessWidget {
   const SectionLabel(this.text, {super.key});
 
@@ -183,8 +178,6 @@ class SectionLabel extends StatelessWidget {
     return Text(text.toUpperCase(), style: AgriTypography.sectionLabel);
   }
 }
-
-// ─── StatusBadge ──────────────────────────────────────────────────────────────
 
 class StatusBadge extends StatelessWidget {
   const StatusBadge({super.key, required this.label});
@@ -253,8 +246,6 @@ class _StatusCfg {
   final Color dot;
 }
 
-// ─── AgriCard ─────────────────────────────────────────────────────────────────
-
 class AgriCard extends StatelessWidget {
   const AgriCard({
     super.key,
@@ -284,8 +275,6 @@ class AgriCard extends StatelessWidget {
     );
   }
 }
-
-// ─── AgriPrimaryButton ────────────────────────────────────────────────────────
 
 class AgriPrimaryButton extends StatelessWidget {
   const AgriPrimaryButton({
@@ -348,8 +337,6 @@ class AgriPrimaryButton extends StatelessWidget {
   }
 }
 
-// ─── StickyBottomBar ──────────────────────────────────────────────────────────
-
 class StickyBottomBar extends StatelessWidget {
   const StickyBottomBar({super.key, required this.child});
 
@@ -372,8 +359,6 @@ class StickyBottomBar extends StatelessWidget {
     );
   }
 }
-
-// ─── TopoPattern ─────────────────────────────────────────────────────────────
 
 class TopoPattern extends StatelessWidget {
   const TopoPattern({
@@ -408,9 +393,6 @@ class _TopoPainter extends CustomPainter {
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
-
-    // Use a uniform "cover" scale so the pattern is never distorted on
-    // cards whose aspect ratio differs from the 400×400 design space.
     final s = (size.width / 400).clamp(size.height / 400, double.infinity);
     final sx = s;
     final sy = s;
@@ -430,13 +412,10 @@ class _TopoPainter extends CustomPainter {
           mid.dy,
         );
       }
-      // close to last point
       final last = pts.last;
       path.lineTo(last.dx * sx, last.dy * sy);
       canvas.drawPath(path, paint);
     }
-
-    // 10 contour lines — full top-to-bottom coverage with organic undulation
     drawCurve([
       const Offset(-20, 18),
       const Offset(70, 6),
@@ -520,8 +499,6 @@ class _TopoPainter extends CustomPainter {
         paint,
       );
     }
-
-    // 4 topo-ring clusters spread across the canvas
     drawEllipse(110, 190, 88, 54);
     drawEllipse(110, 190, 62, 36);
     drawEllipse(110, 190, 36, 20);
@@ -542,8 +519,6 @@ class _TopoPainter extends CustomPainter {
   @override
   bool shouldRepaint(_TopoPainter old) => old.color != color;
 }
-
-// ─── StickyCtaWrapper (correct implementation) ───────────────────────────────
 
 class StickyCtaWrapper extends StatelessWidget {
   const StickyCtaWrapper({super.key, required this.child});
@@ -567,8 +542,6 @@ class StickyCtaWrapper extends StatelessWidget {
     );
   }
 }
-
-// ─── MetricCard ───────────────────────────────────────────────────────────────
 
 class MetricCard extends StatelessWidget {
   const MetricCard({
