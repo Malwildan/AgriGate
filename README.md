@@ -2,7 +2,7 @@
 
 Gateway to a Better Agricultural Ecosystems.
 
-Catatan: Aplikasi akan bekerja maksimal jika digunakan bersama alat pendukung yang sesuai.
+Note: The application works best when used with compatible supporting hardware.
 
 ## Local Setup
 
