@@ -18,14 +18,11 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Install Melos
-        run: dart pub global activate melos
-
       - name: Bootstrap workspace
-        run: melos bootstrap
+        run: flutter pub get && dart run melos bootstrap
 
       - name: Analyze
-        run: melos run analyze
+        run: dart run melos run analyze
 
       - name: Test
-        run: melos run test
+        run: dart run melos run test
