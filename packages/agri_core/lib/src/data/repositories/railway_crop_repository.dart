@@ -5,15 +5,17 @@ import '../../domain/failures/failures.dart';
 import '../../domain/repositories/repositories.dart';
 
 class RailwayCropRepository implements CropRecommendationRepository {
-  RailwayCropRepository({required String baseUrl, Dio? dio})
-      : _dio = dio ??
-            Dio(BaseOptions(
-              baseUrl: baseUrl,
-              connectTimeout: const Duration(seconds: 15),
-              receiveTimeout: const Duration(seconds: 30),
-            ));
+  RailwayCropRepository({required String baseUrl, Dio? dio}) : _baseUrl = baseUrl {
+    _dio = dio ??
+        Dio(BaseOptions(
+          baseUrl: baseUrl,
+          connectTimeout: const Duration(seconds: 15),
+          receiveTimeout: const Duration(seconds: 30),
+        ));
+  }
 
-  final Dio _dio;
+  final String _baseUrl;
+  late final Dio _dio;
 
   @override
   Future<Either<Failure, CropRecommendation>> getRecommendation({
@@ -22,6 +24,14 @@ class RailwayCropRepository implements CropRecommendationRepository {
     double? latitude,
     double? longitude,
   }) async {
+    if (_baseUrl.isEmpty) {
+      return const Left(
+        RecommendationFailure(
+          'RAILWAY_API_URL belum dikonfigurasi. Tambahkan ke .env.json atau dart-define.',
+        ),
+      );
+    }
+
     if (latitude == null || longitude == null) {
       return const Left(RecommendationFailure(
           'Lokasi GPS diperlukan untuk mendapatkan rekomendasi. Aktifkan GPS dan coba lagi.'));

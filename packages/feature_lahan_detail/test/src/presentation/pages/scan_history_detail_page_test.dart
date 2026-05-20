@@ -11,9 +11,15 @@ class _MockGetLahanByIdUseCase extends Mock implements GetLahanByIdUseCase {}
 class _MockUpdateLahanStatusUseCase extends Mock
     implements UpdateLahanStatusUseCase {}
 
+class _MockDeleteLahanUseCase extends Mock implements DeleteLahanUseCase {}
+
+class _MockSyncLahanDataUseCase extends Mock implements SyncLahanDataUseCase {}
+
 void main() {
   late _MockGetLahanByIdUseCase getLahanById;
   late _MockUpdateLahanStatusUseCase updateLahanStatus;
+  late _MockDeleteLahanUseCase deleteLahan;
+  late _MockSyncLahanDataUseCase syncLahanData;
 
   final targetRecord = ScanRecord(
     id: 22,
@@ -49,6 +55,8 @@ void main() {
           create: (_) => DetailBloc(
             getLahanById: getLahanById,
             updateLahanStatus: updateLahanStatus,
+            deleteLahan: deleteLahan,
+            syncLahanData: syncLahanData,
           ),
           child: const ScanHistoryDetailPage(
             lahanId: 7,
@@ -63,6 +71,8 @@ void main() {
   setUp(() {
     getLahanById = _MockGetLahanByIdUseCase();
     updateLahanStatus = _MockUpdateLahanStatusUseCase();
+    deleteLahan = _MockDeleteLahanUseCase();
+    syncLahanData = _MockSyncLahanDataUseCase();
 
     when(() => getLahanById(7)).thenAnswer((_) async => Right(lahan));
   });

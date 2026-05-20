@@ -41,11 +41,15 @@ class _ScanHistoryDetailPageState extends State<ScanHistoryDetailPage> {
             onBack: widget.onBack,
           ),
           body: switch (state) {
-            DetailLoading() || DetailInitial() => const Center(
+            DetailLoading() ||
+            DetailInitial() ||
+            DetailDeleting() =>
+              const Center(
                 child: CircularProgressIndicator.adaptive(),
               ),
             DetailLoaded(:final lahan) => _buildContent(context, lahan),
             DetailError(:final message) => _buildError(context, message),
+            DetailDeleted() => const SizedBox.shrink(),
           },
         );
       },

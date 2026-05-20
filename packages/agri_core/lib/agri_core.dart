@@ -8,4 +8,6 @@ export 'src/data/repositories/offline_first_lahan_repository.dart';
 export 'src/data/repositories/hive_lahan_repository.dart';
 export 'src/data/repositories/railway_crop_repository.dart';
 export 'src/data/repositories/supabase_lahan_remote_data_source.dart';
-export 'src/data/repositories/supabase_session_service.dart';
+export 'src/data/repositories/supabase_auth_service.dart';
+export 'src/support/app_logger.dart';
+export 'src/support/local_id_allocator.dart';
