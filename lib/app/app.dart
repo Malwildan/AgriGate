@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:agri_design_system/agri_design_system.dart';
+import '../design_system/design_system.dart';
 import 'router/app_router.dart';
 
 class AgriGateApp extends StatefulWidget {

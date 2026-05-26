@@ -6,13 +6,15 @@ import 'package:agri_core/src/data/models/supabase_scan_record_dto.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 
-class _FakeUserSessionGate implements UserSessionGate {
-  const _FakeUserSessionGate(this.userId);
+class _FakeSessionService implements SupabaseSessionService {
+  const _FakeSessionService(this.userId);
 
   final String userId;
 
   @override
-  Future<Either<Failure, String>> requireUserId() async => Right(userId);
+  Future<Either<Failure, String>> ensureAnonymousSession() async {
+    return Right(userId);
+  }
 }
 
 class _FakeRemoteDataSource implements SupabaseLahanRemoteDataSource {
@@ -64,7 +66,7 @@ void main() {
       repository = await OfflineFirstLahanRepository.open(
         enableDemoSeed: false,
         remoteDataSource: remoteDataSource,
-        authService: const _FakeUserSessionGate('user-1'),
+        sessionService: const _FakeSessionService('user-1'),
       );
     });
 

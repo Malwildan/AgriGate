@@ -58,7 +58,6 @@ void main() {
       when(() => bleService.disconnect()).thenAnswer((_) async {});
       when(() => bleService.readSensorData())
           .thenAnswer((_) async => const Left(BleFailure('unused')));
-      when(() => bleService.dispose()).thenAnswer((_) async {});
 
       getIt
         ..registerSingleton<BleService>(bleService)

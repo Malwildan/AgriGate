@@ -10,8 +10,8 @@ scripts:
     description: Run dart analyze in all packages
 
   test:
-    run: melos exec --dir-exists=test -- flutter test
-    description: Run tests in packages that have a test directory
+    run: melos exec -- flutter test
+    description: Run tests in all packages
 
   build_runner:
     run: melos exec --depends-on="build_runner" -- dart run build_runner build --delete-conflicting-outputs

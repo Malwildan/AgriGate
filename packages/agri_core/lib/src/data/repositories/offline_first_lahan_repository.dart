@@ -13,6 +13,7 @@ import '../models/supabase_lahan_dto.dart';
 import '../models/supabase_scan_record_dto.dart';
 import 'hive_lahan_repository.dart';
 import 'supabase_lahan_remote_data_source.dart';
+import 'supabase_session_service.dart';
 
 const _syncQueueBoxName = 'sync_queue_box';
 
@@ -22,14 +23,14 @@ class OfflineFirstLahanRepository
     required HiveLahanRepository localRepository,
     required Box<String> queueBox,
     this.remoteDataSource,
-    this.authService,
+    this.sessionService,
   })  : _localRepository = localRepository,
         _queueBox = queueBox;
 
   static Future<OfflineFirstLahanRepository> open({
     required bool enableDemoSeed,
     SupabaseLahanRemoteDataSource? remoteDataSource,
-    UserSessionGate? authService,
+    SupabaseSessionService? sessionService,
   }) async {
     final localRepository = await HiveLahanRepository.open(
       enableDemoSeed: enableDemoSeed,
@@ -40,16 +41,16 @@ class OfflineFirstLahanRepository
       localRepository: localRepository,
       queueBox: queueBox,
       remoteDataSource: remoteDataSource,
-      authService: authService,
+      sessionService: sessionService,
     );
   }
 
   final HiveLahanRepository _localRepository;
   final Box<String> _queueBox;
   final SupabaseLahanRemoteDataSource? remoteDataSource;
-  final UserSessionGate? authService;
+  final SupabaseSessionService? sessionService;
 
-  bool get _isSyncEnabled => remoteDataSource != null && authService != null;
+  bool get _isSyncEnabled => remoteDataSource != null && sessionService != null;
 
   @override
   Future<Either<Failure, List<Lahan>>> getAllLahan() {
@@ -59,16 +60,6 @@ class OfflineFirstLahanRepository
   @override
   Future<Either<Failure, Lahan>> getLahanById(int id) {
     return _localRepository.getLahanById(id);
-  }
-
-  @override
-  Future<Either<Failure, int>> reserveLahanId() {
-    return _localRepository.reserveLahanId();
-  }
-
-  @override
-  Future<Either<Failure, int>> reserveScanRecordId() {
-    return _localRepository.reserveScanRecordId();
   }
 
   @override
@@ -159,7 +150,7 @@ class OfflineFirstLahanRepository
       return const Right(null);
     }
 
-    final sessionResult = await authService!.requireUserId();
+    final sessionResult = await sessionService!.ensureAnonymousSession();
     if (sessionResult.isLeft) {
       return Left(sessionResult.left);
     }

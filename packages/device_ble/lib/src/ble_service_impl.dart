@@ -2,7 +2,6 @@
 import 'dart:async';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:agri_core/agri_core.dart';
-import 'sensor_payload_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 const _kServiceUuid = '12345678-1234-1234-1234-1234567890ab';
 const _kSensorCharUuid = 'abcd1234-5678-1234-5678-abcdef123456';
@@ -154,7 +153,7 @@ class BleServiceImpl implements BleService {
 
     await FlutterBluePlus.stopScan();
 
-    await _scanSub?.cancel();
+    _scanSub?.cancel();
     _scanSub = FlutterBluePlus.scanResults.listen((results) {
       for (final r in results) {
         final name = r.device.platformName;
@@ -258,23 +257,19 @@ class BleServiceImpl implements BleService {
       await characteristic.setNotifyValue(true);
       final bytes = await characteristic.onValueReceived.first;
       final payload = String.fromCharCodes(bytes);
-      final parsed = SensorPayloadParser.parse(payload);
-      return parsed.fold(
-        (failure) => throw BleException(failure.message),
-        Right.new,
-      );
+      if (!payload.startsWith('PH:')) {
+        throw BleException('Format data tidak valid: $payload');
+      }
+
+      final ph = double.tryParse(payload.substring(3));
+      if (ph == null || ph < 0 || ph > 14) {
+        throw BleException('Nilai pH tidak valid: $payload');
+      }
+
+      return Right(ScanData(ph: ph, moisture: 0));
     } catch (e) {
       return Left(BleFailure(e.toString()));
     }
-  }
-
-  @override
-  Future<void> dispose() async {
-    await _scanSub?.cancel();
-    await _devConnSub?.cancel();
-    await _connectionStateController.close();
-    await _scanResultsController.close();
-    _initializeFuture = null;
   }
 }
 
