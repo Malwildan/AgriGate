@@ -6,6 +6,9 @@ import 'package:feature_lahan_list/feature_lahan_list.dart';
 import 'package:feature_scan/feature_scan.dart';
 import 'package:feature_result/feature_result.dart';
 import 'package:feature_lahan_detail/feature_lahan_detail.dart';
+import '../auth/auth_refresh_listenable.dart';
+import '../auth/sign_in_page.dart';
+import '../config/app_config.dart';
 import '../di/injection.dart';
 import '../widgets/bluetooth_connection_badge.dart';
 class ResultRouteExtra {
@@ -35,11 +38,41 @@ class RescanRouteExtra {
   final String location;
 }
 
-final appRouter = GoRouter(
-  initialLocation: '/',
-  routes: [
-    GoRoute(
-      path: '/',
+late final GoRouter appRouter;
+
+GoRouter createAppRouter() {
+  final appConfig = getIt<AppConfig>();
+  final refreshListenable = appConfig.supabase.isConfigured
+      ? AuthRefreshListenable(getIt<SupabaseAuthService>())
+      : null;
+
+  return GoRouter(
+    initialLocation: '/',
+    refreshListenable: refreshListenable,
+    redirect: (context, state) {
+      if (!appConfig.supabase.isConfigured) {
+        return null;
+      }
+
+      final auth = getIt<SupabaseAuthService>();
+      final isOnSignIn = state.matchedLocation == '/sign-in';
+      if (!auth.isSignedIn && !isOnSignIn) {
+        return '/sign-in';
+      }
+      if (auth.isSignedIn && isOnSignIn) {
+        return '/';
+      }
+      return null;
+    },
+    routes: [
+      GoRoute(
+        path: '/sign-in',
+        builder: (context, state) => SignInPage(
+          onSignedIn: () => context.go('/'),
+        ),
+      ),
+      GoRoute(
+        path: '/',
       builder: (context, state) => BlocProvider<LahanListBloc>(
         create: (_) => LahanListBloc(
           getIt<GetAllLahanUseCase>(),
@@ -162,6 +195,8 @@ final appRouter = GoRouter(
           create: (_) => DetailBloc(
             getLahanById: getIt<GetLahanByIdUseCase>(),
             updateLahanStatus: getIt<UpdateLahanStatusUseCase>(),
+            deleteLahan: getIt<DeleteLahanUseCase>(),
+            syncLahanData: getIt<SyncLahanDataUseCase>(),
           ),
           child: ScanHistoryDetailPage(
             lahanId: lahanId,
@@ -181,10 +216,13 @@ final appRouter = GoRouter(
           create: (_) => DetailBloc(
             getLahanById: getIt<GetLahanByIdUseCase>(),
             updateLahanStatus: getIt<UpdateLahanStatusUseCase>(),
+            deleteLahan: getIt<DeleteLahanUseCase>(),
+            syncLahanData: getIt<SyncLahanDataUseCase>(),
           ),
           child: LahanDetailPage(
             lahanId: lahanId,
             onBack: () => context.canPop() ? context.pop() : context.go('/'),
+            onDeleted: () => context.go('/'),
             onRescan: (lahan) => context.push(
               '/scan/${lahan.id}',
               extra: RescanRouteExtra(
@@ -200,5 +238,6 @@ final appRouter = GoRouter(
         );
       },
     ),
-  ],
-);
+    ],
+  );
+}

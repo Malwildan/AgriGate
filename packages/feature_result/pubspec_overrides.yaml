@@ -1,0 +1,6 @@
+# melos_managed_dependency_overrides: agri_core,agri_design_system
+dependency_overrides:
+  agri_core:
+    path: ../agri_core
+  agri_design_system:
+    path: ../agri_design_system

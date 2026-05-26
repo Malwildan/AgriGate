@@ -38,6 +38,7 @@ void main() {
           .thenReturn(BleConnectionState.disconnected);
       when(() => bleService.currentConnectedDevice).thenReturn(null);
         when(() => bleService.lastKnownConnectedDevice).thenReturn(null);
+      when(() => bleService.dispose()).thenAnswer((_) async {});
     });
 
     tearDown(() async {

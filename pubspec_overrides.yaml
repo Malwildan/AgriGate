@@ -1,0 +1,18 @@
+# melos_managed_dependency_overrides: agri_core,agri_design_system,device_ble,device_location,feature_lahan_detail,feature_lahan_list,feature_result,feature_scan
+dependency_overrides:
+  agri_core:
+    path: packages/agri_core
+  agri_design_system:
+    path: packages/agri_design_system
+  device_ble:
+    path: packages/device_ble
+  device_location:
+    path: packages/device_location
+  feature_lahan_detail:
+    path: packages/feature_lahan_detail
+  feature_lahan_list:
+    path: packages/feature_lahan_list
+  feature_result:
+    path: packages/feature_result
+  feature_scan:
+    path: packages/feature_scan

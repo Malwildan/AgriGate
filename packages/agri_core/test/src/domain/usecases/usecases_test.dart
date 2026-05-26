@@ -20,6 +20,18 @@ class _FakeLahanRepository implements LahanRepository {
   }
 
   @override
+  Future<Either<Failure, int>> reserveLahanId() async {
+    if (_stored.isEmpty) {
+      return const Right(42);
+    }
+    final nextId = _stored.keys.reduce((a, b) => a > b ? a : b) + 1;
+    return Right(nextId);
+  }
+
+  @override
+  Future<Either<Failure, int>> reserveScanRecordId() async => const Right(9001);
+
+  @override
   Future<Either<Failure, List<Lahan>>> getAllLahan() async {
     return Right(_stored.values.toList());
   }
@@ -65,7 +77,7 @@ void main() {
 
     test('AddLahanUseCase generates IDs within the Hive key range', () async {
       final repository = _FakeLahanRepository();
-      final useCase = AddLahanUseCase(repository, now: () => fixedNow);
+      final useCase = AddLahanUseCase(repository);
 
       final result = await useCase(const AddLahanParams(
         owner: 'Pak Budi',
@@ -76,7 +88,7 @@ void main() {
       expect(result.isRight, isTrue);
       expect(repository.addedLahan, isNotNull);
       expect(repository.addedLahan!.id, inInclusiveRange(1, 0xFFFFFFFF));
-      expect(repository.addedLahan!.id, isNot(fixedNow.millisecondsSinceEpoch));
+      expect(repository.addedLahan!.id, 42);
     });
 
     test(
