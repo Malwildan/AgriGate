@@ -28,15 +28,6 @@ class DetailStatusChanged extends DetailEvent {
   List<Object?> get props => [lahanId, status];
 }
 
-class DetailDeleteRequested extends DetailEvent {
-  const DetailDeleteRequested(this.lahanId);
-
-  final int lahanId;
-
-  @override
-  List<Object?> get props => [lahanId];
-}
-
 sealed class DetailState extends Equatable {
   const DetailState();
   @override
@@ -64,14 +55,6 @@ class DetailLoaded extends DetailState {
   List<Object?> get props => [lahan];
 }
 
-class DetailDeleting extends DetailState {
-  const DetailDeleting();
-}
-
-class DetailDeleted extends DetailState {
-  const DetailDeleted();
-}
-
 class DetailError extends DetailState {
   const DetailError(this.message);
 
@@ -85,22 +68,15 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
   DetailBloc({
     required GetLahanByIdUseCase getLahanById,
     required UpdateLahanStatusUseCase updateLahanStatus,
-    required DeleteLahanUseCase deleteLahan,
-    required SyncLahanDataUseCase syncLahanData,
   })  : _getLahanById = getLahanById,
         _updateLahanStatus = updateLahanStatus,
-        _deleteLahan = deleteLahan,
-        _syncLahanData = syncLahanData,
         super(const DetailInitial()) {
     on<DetailLoadRequested>(_onLoad);
     on<DetailStatusChanged>(_onStatusChanged);
-    on<DetailDeleteRequested>(_onDelete);
   }
 
   final GetLahanByIdUseCase _getLahanById;
   final UpdateLahanStatusUseCase _updateLahanStatus;
-  final DeleteLahanUseCase _deleteLahan;
-  final SyncLahanDataUseCase _syncLahanData;
 
   Future<void> _onLoad(
     DetailLoadRequested event,
@@ -132,25 +108,5 @@ class DetailBloc extends Bloc<DetailEvent, DetailState> {
       (failure) => emit(DetailError(failure.message)),
       (lahan) => emit(current.copyWith(lahan: lahan)),
     );
-  }
-
-  Future<void> _onDelete(
-    DetailDeleteRequested event,
-    Emitter<DetailState> emit,
-  ) async {
-    emit(const DetailDeleting());
-    final deleteResult = await _deleteLahan(event.lahanId);
-    if (deleteResult.isLeft) {
-      emit(DetailError(deleteResult.left.message));
-      return;
-    }
-
-    final syncResult = await _syncLahanData(const NoParams());
-    if (syncResult.isLeft) {
-      emit(DetailError(syncResult.left.message));
-      return;
-    }
-
-    emit(const DetailDeleted());
   }
 }

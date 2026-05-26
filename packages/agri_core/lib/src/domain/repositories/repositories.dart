@@ -35,8 +35,6 @@ abstract interface class LahanRepository {
   Future<Either<Failure, Lahan>> addLahan(Lahan lahan);
   Future<Either<Failure, Lahan>> updateLahan(Lahan lahan);
   Future<Either<Failure, void>> deleteLahan(int id);
-  Future<Either<Failure, int>> reserveLahanId();
-  Future<Either<Failure, int>> reserveScanRecordId();
 }
 
 abstract interface class ScanRepository {
@@ -62,7 +60,6 @@ abstract interface class BleService {
   Future<Either<BleFailure, void>> connectToDevice(String deviceId);
   Future<void> disconnect();
   Future<Either<BleFailure, ScanData>> readSensorData();
-  Future<void> dispose();
 }
 
 enum BleConnectionState { disconnected, connecting, connected, disconnecting }
@@ -70,10 +67,6 @@ enum BleConnectionState { disconnected, connecting, connected, disconnecting }
 abstract interface class LocationService {
   Future<Either<Failure, String>> getCurrentLocationString();
   Future<bool> requestPermission();
-}
-
-abstract interface class UserSessionGate {
-  Future<Either<Failure, String>> requireUserId();
 }
 
 abstract interface class CropRecommendationRepository {

@@ -3,7 +3,6 @@ import 'package:hive/hive.dart';
 import '../../domain/entities/entities.dart';
 import '../../domain/failures/failures.dart';
 import '../../domain/repositories/repositories.dart';
-import '../../support/local_id_allocator.dart';
 import '../models/lahan_model.dart';
 
 const _lahanBoxName = 'lahan_box';
@@ -198,38 +197,6 @@ class HiveLahanRepository implements LahanRepository {
   }
 
   @override
-  Future<Either<Failure, int>> reserveLahanId() async {
-    try {
-      final id = LocalIdAllocator.allocateLahanId(
-        _box.keys.cast<int>(),
-        DateTime.now().toUtc(),
-      );
-      return Right(id);
-    } catch (e) {
-      return Left(CacheFailure('Gagal membuat ID lahan: $e'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, int>> reserveScanRecordId() async {
-    try {
-      final usedIds = <int>{};
-      for (final model in _box.values) {
-        for (final record in model.scanHistory) {
-          usedIds.add(record.id);
-        }
-      }
-      final id = LocalIdAllocator.allocateScanRecordId(
-        usedIds,
-        DateTime.now().toUtc(),
-      );
-      return Right(id);
-    } catch (e) {
-      return Left(CacheFailure('Gagal membuat ID riwayat scan: $e'));
-    }
-  }
-
-  @override
   Future<Either<Failure, void>> deleteLahan(int id) async {
     try {
       final existing = _box.get(id);
@@ -244,5 +211,26 @@ class HiveLahanRepository implements LahanRepository {
     } catch (e) {
       return Left(CacheFailure('Gagal menghapus lahan: $e'));
     }
+  }
+}
+
+class HiveScanRepository implements ScanRepository {
+  HiveScanRepository(this._lahanRepository);
+
+  final LahanRepository _lahanRepository;
+
+  @override
+  Future<Either<Failure, Lahan>> saveScanResult({
+    required int lahanId,
+    required ScanRecord record,
+  }) async {
+    final result = await _lahanRepository.getLahanById(lahanId);
+    if (result.isLeft) return result;
+
+    final updated = result.right.copyWith(
+      status: LahanStatus.aktif,
+      scanHistory: [record, ...result.right.scanHistory],
+    );
+    return _lahanRepository.updateLahan(updated);
   }
 }

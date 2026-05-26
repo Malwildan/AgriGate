@@ -3,7 +3,14 @@ import '../entities/entities.dart';
 import '../failures/failures.dart';
 import '../repositories/repositories.dart';
 
+const _maxHiveIntKey = 0xFFFFFFFF;
+
 DateTime _utcNow() => DateTime.now().toUtc();
+
+int _generateHiveCompatibleId(DateTime timestamp) {
+  final id = timestamp.millisecondsSinceEpoch & _maxHiveIntKey;
+  return id == 0 ? 1 : id;
+}
 
 abstract class UseCase<ResultType, Params> {
   Future<Either<Failure, ResultType>> call(Params params);
@@ -45,19 +52,17 @@ class AddLahanParams {
 }
 
 class AddLahanUseCase implements UseCase<Lahan, AddLahanParams> {
-  const AddLahanUseCase(this._repository);
+  AddLahanUseCase(this._repository, {DateTime Function()? now})
+      : _now = now ?? _utcNow;
 
   final LahanRepository _repository;
+  final DateTime Function() _now;
 
   @override
-  Future<Either<Failure, Lahan>> call(AddLahanParams params) async {
-    final idResult = await _repository.reserveLahanId();
-    if (idResult.isLeft) {
-      return Left(idResult.left);
-    }
-
+  Future<Either<Failure, Lahan>> call(AddLahanParams params) {
+    final now = _now();
     final lahan = Lahan(
-      id: idResult.right,
+      id: _generateHiveCompatibleId(now),
       owner: params.owner.trim().isEmpty ? 'Pemilik Baru' : params.owner.trim(),
       area: params.area.trim().isEmpty ? 'Lahan Baru' : params.area.trim(),
       location: params.location.trim(),
@@ -88,16 +93,6 @@ class UpdateLahanStatusUseCase
     final updated = result.right.copyWith(status: params.status);
     return _repository.updateLahan(updated);
   }
-}
-
-class DeleteLahanUseCase implements UseCase<void, int> {
-  const DeleteLahanUseCase(this._repository);
-
-  final LahanRepository _repository;
-
-  @override
-  Future<Either<Failure, void>> call(int lahanId) =>
-      _repository.deleteLahan(lahanId);
 }
 
 class SaveScanResultParams {
@@ -135,13 +130,8 @@ class SaveScanResultUseCase implements UseCase<Lahan, SaveScanResultParams> {
   @override
   Future<Either<Failure, Lahan>> call(SaveScanResultParams params) async {
     final now = _now();
-    final recordIdResult = await _lahanRepository.reserveScanRecordId();
-    if (recordIdResult.isLeft) {
-      return Left(recordIdResult.left);
-    }
-
     final record = ScanRecord(
-      id: recordIdResult.right,
+      id: now.microsecondsSinceEpoch,
       recordedAt: now,
       ph: params.ph,
       moisture: params.moisture,
@@ -171,13 +161,9 @@ class SaveScanResultUseCase implements UseCase<Lahan, SaveScanResultParams> {
     required String area,
     required String location,
   }) async {
-    final idResult = await _lahanRepository.reserveLahanId();
-    if (idResult.isLeft) {
-      return Left(idResult.left);
-    }
-
+    final now = _now();
     final lahan = Lahan(
-      id: idResult.right,
+      id: _generateHiveCompatibleId(now),
       owner: owner.trim().isEmpty ? 'Pemilik Baru' : owner.trim(),
       area: area.trim().isEmpty ? 'Lahan Baru' : area.trim(),
       location: location.trim(),

@@ -14,14 +14,12 @@ class LahanDetailPage extends StatefulWidget {
     super.key,
     required this.lahanId,
     required this.onBack,
-    required this.onDeleted,
     required this.onRescan,
     required this.onOpenHistoryRecord,
   });
 
   final int lahanId;
   final VoidCallback onBack;
-  final VoidCallback onDeleted;
   final ValueChanged<Lahan> onRescan;
   final ValueChanged<ScanRecord> onOpenHistoryRecord;
 
@@ -36,83 +34,29 @@ class _LahanDetailPageState extends State<LahanDetailPage> {
     context.read<DetailBloc>().add(DetailLoadRequested(widget.lahanId));
   }
 
-  Future<void> _confirmDelete(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Hapus lahan?'),
-        content: const Text(
-          'Semua riwayat scan pada lahan ini akan dihapus. Tindakan ini tidak dapat dibatalkan.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Batal'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text('Hapus'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true && context.mounted) {
-      context
-          .read<DetailBloc>()
-          .add(DetailDeleteRequested(widget.lahanId));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return BlocListener<DetailBloc, DetailState>(
-      listenWhen: (previous, current) => current is DetailDeleted,
-      listener: (context, state) {
-        if (state is DetailDeleted) {
-          widget.onDeleted();
-        }
+    return BlocBuilder<DetailBloc, DetailState>(
+      builder: (context, state) {
+        return Scaffold(
+          backgroundColor: AgriColors.background,
+          appBar: AgriAppBar(backLabel: 'Lahan', onBack: widget.onBack),
+          body: switch (state) {
+            DetailLoading() || DetailInitial() => _buildSkeleton(),
+            DetailLoaded(:final lahan) => _buildContent(context, lahan),
+            DetailError(:final message) => _buildError(context, message),
+          },
+          bottomNavigationBar: state is DetailLoaded
+              ? StickyCtaWrapper(
+                  child: AgriPrimaryButton(
+                    label: 'Scan Ulang Lahan Ini',
+                    icon: Icons.document_scanner_rounded,
+                    onPressed: () => widget.onRescan(state.lahan),
+                  ),
+                )
+              : null,
+        );
       },
-      child: BlocBuilder<DetailBloc, DetailState>(
-        builder: (context, state) {
-          return Scaffold(
-            backgroundColor: AgriColors.background,
-            appBar: AgriAppBar(
-              backLabel: 'Lahan',
-              onBack: widget.onBack,
-              actions: state is DetailLoaded
-                  ? [
-                      IconButton(
-                        tooltip: 'Hapus lahan',
-                        onPressed: state is DetailDeleting
-                            ? null
-                            : () => _confirmDelete(context),
-                        icon: const Icon(Icons.delete_outline_rounded),
-                      ),
-                    ]
-                  : null,
-            ),
-            body: switch (state) {
-              DetailLoading() ||
-              DetailInitial() ||
-              DetailDeleting() =>
-                _buildSkeleton(),
-              DetailLoaded(:final lahan) => _buildContent(context, lahan),
-              DetailError(:final message) => _buildError(context, message),
-              DetailDeleted() => const SizedBox.shrink(),
-            },
-            bottomNavigationBar: state is DetailLoaded
-                ? StickyCtaWrapper(
-                    child: AgriPrimaryButton(
-                      label: 'Scan Ulang Lahan Ini',
-                      icon: Icons.document_scanner_rounded,
-                      onPressed: () => widget.onRescan(state.lahan),
-                    ),
-                  )
-                : null,
-          );
-        },
-      ),
     );
   }
 
