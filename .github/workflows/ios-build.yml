@@ -1,0 +1,64 @@
+name: iOS build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ios:
+    runs-on: macos-15
+    timeout-minutes: 60
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@fd55f4c5af5b953cc57a2be44cb082c8f6635e8e # v2.21.0
+        with:
+          channel: stable
+          flutter-version: '3.35.7'
+          cache: true
+
+      - name: Show build tool versions
+        run: |
+          flutter --version
+          xcodebuild -version
+          pod --version
+
+      - name: Resolve locked dependencies
+        run: flutter pub get --enforce-lockfile
+
+      - name: Build unsigned iPhone app
+        run: flutter build ios --release --no-codesign
+
+      - name: Package unsigned iPhone app
+        run: ditto -c -k --sequesterRsrc --keepParent build/ios/iphoneos/Runner.app "$RUNNER_TEMP/AgriGate-iphoneos-unsigned.zip"
+
+      - name: Upload unsigned iPhone app
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: AgriGate-iphoneos-unsigned
+          path: ${{ runner.temp }}/AgriGate-iphoneos-unsigned.zip
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Build iOS simulator app
+        run: flutter build ios --simulator --debug --no-codesign
+
+      - name: Package iOS simulator app
+        run: ditto -c -k --sequesterRsrc --keepParent build/ios/iphonesimulator/Runner.app "$RUNNER_TEMP/AgriGate-iphonesimulator.zip"
+
+      - name: Upload iOS simulator app
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: AgriGate-iphonesimulator
+          path: ${{ runner.temp }}/AgriGate-iphonesimulator.zip
+          if-no-files-found: error
+          retention-days: 7
