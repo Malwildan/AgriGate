@@ -34,6 +34,14 @@ migrate_working_dir/
 /build/
 /coverage/
 .env.json
+.env
+.env.*
+!.env.example.json
+*.p12
+*.p8
+*.mobileprovision
+*.cer
+*.key
 
 # Symbolication related
 app.*.symbols

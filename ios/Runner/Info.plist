@@ -24,6 +24,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>AgriGate uses Bluetooth to connect to the soil sensor and read measurements.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>AgriGate uses your location while scanning to record where a soil measurement was taken.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
